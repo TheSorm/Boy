@@ -1,8 +1,11 @@
-package cpu;
+package cpuTests;
 
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+
+import cpu.Accumulator;
+import cpu.Flags;
 
 public class AccumulatorTest
 {

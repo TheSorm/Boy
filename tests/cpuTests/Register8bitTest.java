@@ -1,8 +1,12 @@
-package cpu;
+package cpuTests;
 
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+
+import cpu.Accumulator;
+import cpu.Flags;
+import cpu.Register8bit;
 
 public class Register8bitTest
 {

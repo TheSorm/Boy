@@ -1,4 +1,4 @@
-package cpu;
+package cpuTests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -15,6 +15,14 @@ import cartridge.Cartridge;
 import cartridge.RomBank0;
 import cartridge.SwitchableRamBank;
 import cartridge.SwitchableRomBank;
+import cpu.Accumulator;
+import cpu.CPU;
+import cpu.Flags;
+import cpu.InterruptEnableRegister;
+import cpu.InterruptFlagRegister;
+import cpu.ProgrammCounter;
+import cpu.Register16bit;
+import cpu.Register8bit;
 import joypad.JoypadInformationRegister;
 import ppu.BackgroundAndWindowColorPalette;
 import ppu.DirectMemoryAcessRegister;

@@ -5,14 +5,15 @@ Boy is a Gamboy (dmg not 0) emulator written in Java.
 
 ### Goals
 * Writing a good understandable emulator without any magic
+* Understanding how the hardware works to make a clear implementation
 
 ### Non-goals
-* Having the best performance or the most extra tools
+* Having the best performance
 
 ### To-do
 * Pass all tests for dmg (not 0)
 * Implement sound
-* totally split ui from emulator
+* Totally split ui from emulator
 
 # Tests
 

@@ -1,4 +1,4 @@
-package generell;
+package general;
 
 import org.junit.Before;
 

@@ -1,8 +1,7 @@
-package generell;
+package general;
 
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,33 +13,24 @@ import org.junit.runners.Parameterized.Parameters;
 import gameboy.Gameboy;
 
 @RunWith(Parameterized.class)
-public class BlarggsRomsTest extends NoOutputTest
+public class SingleBlarggsTest
 {
-	@Parameters( name = "{1}" )
+	@Parameters(name = "{1}")
 	public static List<Object> data()
 	{
 		List<Object> files = new ArrayList<>();
-		
-		File folder = new File("resources/TestData/blarggs");
-		File[] listOfFolders = folder.listFiles();
-				
-		for (int i = 0; i < listOfFolders.length; i++)
-		{
-			File[] listOfFiles = new File(listOfFolders[i].getPath() + "/individual").listFiles();
-			for (int j = 0; j < listOfFiles.length; j++)
-			{
-				String[] input = new String[2];
-				input[0] = listOfFiles[j].getPath();
-				input[1] = listOfFiles[j].getName();
-				files.add(input);
-			}
-		}
+
+		String[] input = new String[2];
+		input[0] = "resources\\TestData\\mooneye-gb_hwtests\\acceptance\\add_sp_e_timing.gb";
+		input[1] = "add_sp_e_timing.gb";
+		files.add(input);
+
 		return files;
 	}
 
 	private String fInput;
 
-	public BlarggsRomsTest(String input, String name)
+	public SingleBlarggsTest(String input, String name)
 	{
 		this.fInput = input;
 	}
@@ -60,8 +50,8 @@ public class BlarggsRomsTest extends NoOutputTest
 				gameboy.getRam().put(0xFF01, 0);
 			}
 		}
-		
-		assertTrue(result.toString() + "\n" + fInput, result.indexOf("Passed") != -1);
+
+		assertTrue(result.toString(), result.indexOf("Passed") != -1);
 	}
 
 }

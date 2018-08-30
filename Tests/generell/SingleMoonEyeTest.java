@@ -23,7 +23,7 @@ public class SingleMoonEyeTest // extends NoOutputTest
 		List<Object> files = new ArrayList<>();
 
 		String[] input = new String[2];
-		input[0] = "resources\\TestData\\mooneye-gb_hwtests\\acceptance\\add_sp_e_timing.gb";
+		input[0] = "resources\\TestData\\mooneye-gb_hwtests\\manual-only\\sprite_priority.gb";
 		input[1] = "add_sp_e_timing.gb";
 		files.add(input);
 

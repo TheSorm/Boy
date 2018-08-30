@@ -1,0 +1,7 @@
+*.gb
+/.settings
+/bin
+/.classpath
+/.project
+**/blarggs
+**/mooneye-gb_hwtests

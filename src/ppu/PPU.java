@@ -1,8 +1,8 @@
 package ppu;
 
 import cpu.InterruptFlagRegister;
-import cpu.TickBasedComponend;
 import gameboy.MegiHertz;
+import gameboy.TickBasedComponend;
 import ppu.Fetcher.Mode;
 import ppu.LCDControlStatusRegister.LCDStatus;
 import ppu.OAMSearcher.OAMState;

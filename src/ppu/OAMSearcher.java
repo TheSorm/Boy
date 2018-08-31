@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 
-import cpu.TickBasedComponend;
 import gameboy.MegiHertz;
+import gameboy.TickBasedComponend;
 import ppu.LCDControllRegister.objectSize;
 
 public class OAMSearcher extends TickBasedComponend

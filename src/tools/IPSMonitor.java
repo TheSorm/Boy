@@ -1,7 +1,7 @@
 package tools;
 
-import cpu.TickBasedComponend;
 import gameboy.MegiHertz;
+import gameboy.TickBasedComponend;
 
 public class IPSMonitor extends TickBasedComponend
 {

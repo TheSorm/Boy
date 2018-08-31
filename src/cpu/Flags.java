@@ -1,11 +1,19 @@
 package cpu;
 
-public class Flags extends Register8bit
+/**
+ * Special register which contains the results from the recent instruction which
+ * has affected flags. The lower 4 bits are allays 0.
+ */
+public class Flags extends Register8Bit
 {
 	private final static byte ZERO_FLAG_POSITION = 7;
 	private final static byte SUBTRACT_FLAG_POSITION = 6;
 	private final static byte HALF_CARRY_FLAG_POSITION = 5;
 	private final static byte CARRY_FLAG_POSITION = 4;
+	private final static byte RESET_BIT_POSITION_3 = 3;
+	private final static byte RESET_BIT_POSITION_2 = 2;
+	private final static byte RESET_BIT_POSITION_1 = 1;
+	private final static byte RESET_BIT_POSITION_0 = 0;
 
 	public Flags(boolean zeroFlag, boolean subtractFlag, boolean halfCarryFlag, boolean carryFlag)
 	{
@@ -15,8 +23,20 @@ public class Flags extends Register8bit
 		setSubtractFlag(subtractFlag);
 		setHalfCarryFlag(halfCarryFlag);
 		setCarryFlag(carryFlag);
+		res((byte) RESET_BIT_POSITION_0);
+		res((byte) RESET_BIT_POSITION_1);
+		res((byte) RESET_BIT_POSITION_2);
+		res((byte) RESET_BIT_POSITION_3);
 	}
 
+	/**
+	 * Complement carry flag.
+	 * 
+	 * @CarryFlag: Complemented.
+	 * @HalfCarryFlag: Reset.
+	 * @SubtractFlag: Reset.
+	 * @ZeroFlag: Not changed.
+	 */
 	public void ccf()
 	{
 		res(SUBTRACT_FLAG_POSITION);
@@ -24,6 +44,14 @@ public class Flags extends Register8bit
 		invert(CARRY_FLAG_POSITION);
 	}
 
+	/**
+	 * Set carry flag.
+	 * 
+	 * @CarryFlag: Set.
+	 * @HalfCarryFlag: Reset.
+	 * @SubtractFlag: Reset.
+	 * @ZeroFlag: Not changed.
+	 */
 	public void scf()
 	{
 		res(SUBTRACT_FLAG_POSITION);
@@ -35,10 +63,10 @@ public class Flags extends Register8bit
 	public void put(byte value)
 	{
 		super.put(value);
-		res((byte) 0);
-		res((byte) 1);
-		res((byte) 2);
-		res((byte) 3);
+		res((byte) RESET_BIT_POSITION_0);
+		res((byte) RESET_BIT_POSITION_1);
+		res((byte) RESET_BIT_POSITION_2);
+		res((byte) RESET_BIT_POSITION_3);
 	}
 
 	public boolean isZeroFlag()
@@ -56,7 +84,6 @@ public class Flags extends Register8bit
 		{
 			res(ZERO_FLAG_POSITION);
 		}
-
 	}
 
 	public boolean isSubtractFlag()
@@ -112,11 +139,11 @@ public class Flags extends Register8bit
 
 	private void invert(byte position)
 	{
-		registerValue = (byte) (Byte.toUnsignedInt(registerValue) ^ (1 << position));
+		signedRegisterValue = (byte) (loadUnsigned() ^ (1 << position));
 	}
 
 	private boolean isSet(byte position)
 	{
-		return ((Byte.toUnsignedInt(registerValue) >> position) & 1) == 1;
+		return ((loadUnsigned() >> position) & 1) == 1;
 	}
 }

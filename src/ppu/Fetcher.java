@@ -1,8 +1,8 @@
 
 package ppu;
 
-import cpu.TickBasedComponend;
 import gameboy.MegiHertz;
+import gameboy.TickBasedComponend;
 import ppu.Fetcher.State;
 import ppu.PixelInformation.Source;
 import ram.AdressSpace;

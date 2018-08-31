@@ -2,8 +2,8 @@ package ram;
 
 import cartridge.BootRomUnmapRegister;
 import cartridge.Cartridge;
-import cpu.TickBasedComponend;
 import gameboy.MegiHertz;
+import gameboy.TickBasedComponend;
 
 public class CardridgeOverBootRomMapper extends TickBasedComponend
 {

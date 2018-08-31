@@ -3,8 +3,8 @@ package ppu;
 import java.awt.image.BufferedImage;
 import java.util.LinkedList;
 
-import cpu.TickBasedComponend;
 import gameboy.MegiHertz;
+import gameboy.TickBasedComponend;
 import ppu.PixelInformation.Source;
 
 public class PixelFifo extends TickBasedComponend

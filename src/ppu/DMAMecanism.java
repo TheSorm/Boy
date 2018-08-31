@@ -1,7 +1,7 @@
 package ppu;
 
-import cpu.TickBasedComponend;
 import gameboy.MegiHertz;
+import gameboy.TickBasedComponend;
 import ram.Ram;
 
 public class DMAMecanism extends TickBasedComponend

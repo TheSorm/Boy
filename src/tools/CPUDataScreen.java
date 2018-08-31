@@ -9,7 +9,7 @@ import cpu.Accumulator;
 import cpu.Flags;
 import cpu.ProgrammCounter;
 import cpu.Register16bit;
-import cpu.Register8bit;
+import cpu.Register8Bit;
 import ram.Ram;
 
 public class CPUDataScreen extends JFrame implements Runnable
@@ -20,12 +20,12 @@ public class CPUDataScreen extends JFrame implements Runnable
 	private Flags flags;
 	private Register16bit sp;
 	private ProgrammCounter pc;
-	private Register8bit b;
-	private Register8bit c;
-	private Register8bit d;
-	private Register8bit e;
-	private Register8bit h;
-	private Register8bit l;
+	private Register8Bit b;
+	private Register8Bit c;
+	private Register8Bit d;
+	private Register8Bit e;
+	private Register8Bit h;
+	private Register8Bit l;
 
 	JLabel register = new JLabel("Register");
 	JLabel biner = new JLabel("Binär");
@@ -99,8 +99,8 @@ public class CPUDataScreen extends JFrame implements Runnable
 	JLabel pcInstructionValueD = new JLabel();
 	JLabel pcInstructionValueH = new JLabel();
 
-	public CPUDataScreen(Ram ram, Accumulator accu, ProgrammCounter pc, Register16bit sp, Register8bit b,
-			Register8bit c, Register8bit d, Register8bit e, Register8bit h, Register8bit l, Flags flags)
+	public CPUDataScreen(Ram ram, Accumulator accu, ProgrammCounter pc, Register16bit sp, Register8Bit b,
+			Register8Bit c, Register8Bit d, Register8Bit e, Register8Bit h, Register8Bit l, Flags flags)
 	{
 		super("My Frame");
 

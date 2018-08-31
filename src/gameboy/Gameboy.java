@@ -17,7 +17,7 @@ import cpu.InterruptEnableRegister;
 import cpu.InterruptFlagRegister;
 import cpu.ProgrammCounter;
 import cpu.Register16bit;
-import cpu.Register8bit;
+import cpu.Register8Bit;
 import joypad.JoyPad;
 import joypad.JoypadInformationRegister;
 import ppu.BackgroundAndWindowColorPalette;
@@ -75,12 +75,12 @@ public class Gameboy
 	private Register16bit sp;
 	private ProgrammCounter pc;
 
-	private Register8bit b;
-	private Register8bit c;
-	private Register8bit d;
-	private Register8bit e;
-	private Register8bit h;
-	private Register8bit l;
+	private Register8Bit b;
+	private Register8Bit c;
+	private Register8Bit d;
+	private Register8Bit e;
+	private Register8Bit h;
+	private Register8Bit l;
 	private int baseClockHz;
 
 	public Gameboy(String RomPath, int baseClockHz)
@@ -91,12 +91,12 @@ public class Gameboy
 		this.pc = new ProgrammCounter((short) 0, flags);
 		this.accu = new Accumulator((byte) 0, flags);
 		this.sp = new Register16bit((short) 0xFFFE, flags);
-		this.b = new Register8bit((byte) 0, flags);
-		this.c = new Register8bit((byte) 0, flags);
-		this.d = new Register8bit((byte) 0, flags);
-		this.e = new Register8bit((byte) 0, flags);
-		this.h = new Register8bit((byte) 0, flags);
-		this.l = new Register8bit((byte) 0, flags);
+		this.b = new Register8Bit((byte) 0, flags);
+		this.c = new Register8Bit((byte) 0, flags);
+		this.d = new Register8Bit((byte) 0, flags);
+		this.e = new Register8Bit((byte) 0, flags);
+		this.h = new Register8Bit((byte) 0, flags);
+		this.l = new Register8Bit((byte) 0, flags);
 
 		LCDControllRegister lcdControll = new LCDControllRegister();
 		BootRomUnmapRegister bootRomTurnOff = new BootRomUnmapRegister();

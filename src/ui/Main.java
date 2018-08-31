@@ -12,7 +12,7 @@ public class Main
 		Window window = new Window(gb.getIPSMonitor(), gb.getPanel(), gb.getKeyListener());
 		Sound sound = new Sound();
 
-		//new Thread(sound).start();
+		// new Thread(sound).start();
 		new Thread(window).start();
 		window.setVisible(true);
 		gb.start();

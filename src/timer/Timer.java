@@ -1,8 +1,8 @@
 package timer;
 
 import cpu.InterruptFlagRegister;
-import cpu.TickBasedComponend;
 import gameboy.MegiHertz;
+import gameboy.TickBasedComponend;
 
 public class Timer extends TickBasedComponend
 {

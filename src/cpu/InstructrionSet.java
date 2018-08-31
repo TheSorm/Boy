@@ -29,15 +29,15 @@ public class InstructrionSet
 
 	private interface RegisterOperation
 	{
-		public void invoke(Register8bit register);
+		public void invoke(Register8Bit register);
 	}
 
 	private class RegisterPair
 	{
-		final Register8bit first;
-		final Register8bit second;
+		final Register8Bit first;
+		final Register8Bit second;
 
-		public RegisterPair(Register8bit first, Register8bit second)
+		public RegisterPair(Register8Bit first, Register8Bit second)
 		{
 			this.first = first;
 			this.second = second;
@@ -56,14 +56,14 @@ public class InstructrionSet
 	private byte lowShadow;
 	private byte highShadow;
 
-	public InstructrionSet(CPU cpu, Ram ram, Accumulator accu, ProgrammCounter pc, Register16bit sp, Register8bit b,
-			Register8bit c, Register8bit d, Register8bit e, Register8bit h, Register8bit l, Flags flags)
+	public InstructrionSet(CPU cpu, Ram ram, Accumulator accu, ProgrammCounter pc, Register16bit sp, Register8Bit b,
+			Register8Bit c, Register8Bit d, Register8Bit e, Register8Bit h, Register8Bit l, Flags flags)
 	{
 		this.operationQueue = new LinkedList<>();
 		lowShadow = 0;
 		highShadow = 0;
 
-		HashMap<Character, Register8bit> opCodeToRegister = new HashMap<>();
+		HashMap<Character, Register8Bit> opCodeToRegister = new HashMap<>();
 		opCodeToRegister.put('0', b);
 		opCodeToRegister.put('1', c);
 		opCodeToRegister.put('2', d);
@@ -92,14 +92,14 @@ public class InstructrionSet
 		opCodeToOperation.put('7', (byte value) -> accu.cp(value));
 
 		HashMap<Character, RegisterOperation> cbOpCodeToOperation = new HashMap<>();
-		cbOpCodeToOperation.put('0', (Register8bit register) -> register.rlc());
-		cbOpCodeToOperation.put('1', (Register8bit register) -> register.rrc());
-		cbOpCodeToOperation.put('2', (Register8bit register) -> register.rl());
-		cbOpCodeToOperation.put('3', (Register8bit register) -> register.rr());
-		cbOpCodeToOperation.put('4', (Register8bit register) -> register.sla());
-		cbOpCodeToOperation.put('5', (Register8bit register) -> register.sra());
-		cbOpCodeToOperation.put('6', (Register8bit register) -> register.swap());
-		cbOpCodeToOperation.put('7', (Register8bit register) -> register.srl());
+		cbOpCodeToOperation.put('0', (Register8Bit register) -> register.rlc());
+		cbOpCodeToOperation.put('1', (Register8Bit register) -> register.rrc());
+		cbOpCodeToOperation.put('2', (Register8Bit register) -> register.rl());
+		cbOpCodeToOperation.put('3', (Register8Bit register) -> register.rr());
+		cbOpCodeToOperation.put('4', (Register8Bit register) -> register.sla());
+		cbOpCodeToOperation.put('5', (Register8Bit register) -> register.sra());
+		cbOpCodeToOperation.put('6', (Register8Bit register) -> register.swap());
+		cbOpCodeToOperation.put('7', (Register8Bit register) -> register.srl());
 
 		HashMap<Character, Condition> opCodeToCondition = new HashMap<>();
 		opCodeToCondition.put('0', () -> {
@@ -208,13 +208,13 @@ public class InstructrionSet
 		instructions.put("065", () -> dcrWhereHLPoints(flags, ram, h, l));
 		instructions.put("066", () -> loadDirect8ToWhereHLPoints(pc, ram, h, l));
 
-		for (Map.Entry<Character, Register8bit> from : opCodeToRegister.entrySet())
+		for (Map.Entry<Character, Register8Bit> from : opCodeToRegister.entrySet())
 		{
 			instructions.put("0" + from.getKey() + "4", () -> from.getValue().inc());
 			instructions.put("0" + from.getKey() + "5", () -> from.getValue().dcr());
 			instructions.put("0" + from.getKey() + "6", () -> putImmediate8InRegister(pc, ram, from.getValue()));
 
-			for (Map.Entry<Character, Register8bit> into : opCodeToRegister.entrySet())
+			for (Map.Entry<Character, Register8Bit> into : opCodeToRegister.entrySet())
 			{
 				instructions.put("1" + into.getKey() + from.getKey(),
 						() -> into.getValue().put(from.getValue().load()));
@@ -233,7 +233,7 @@ public class InstructrionSet
 
 		for (Map.Entry<Character, ByteInputOperation> operation : opCodeToOperation.entrySet())
 		{
-			for (Map.Entry<Character, Register8bit> with : opCodeToRegister.entrySet())
+			for (Map.Entry<Character, Register8Bit> with : opCodeToRegister.entrySet())
 			{
 				instructions.put("2" + operation.getKey() + with.getKey(),
 						() -> operation.getValue().invoke(with.getValue().load()));
@@ -288,7 +288,7 @@ public class InstructrionSet
 
 		instructions.put("340", () -> loadRegisterToHighAndDirect8(pc, ram, accu));
 		instructions.put("342",
-				() -> putRegisterInRamAdressedByRegister(ram, new Register8bit((byte) 255, flags), c, accu));
+				() -> putRegisterInRamAdressedByRegister(ram, new Register8Bit((byte) 255, flags), c, accu));
 
 		instructions.put("350", () -> addSignedDirect8ToRegister(pc, ram, sp));
 		instructions.put("351", () -> {
@@ -299,7 +299,7 @@ public class InstructrionSet
 		instructions.put("360", () -> loadHighAndDirect8ToRegister(pc, ram, accu));
 		instructions.put("361", () -> popToRegister(sp, ram, accu, flags));
 		instructions.put("362",
-				() -> loadRamAdressedByRegisterInRegister(ram, new Register8bit((byte) 255, flags), c, accu));
+				() -> loadRamAdressedByRegisterInRegister(ram, new Register8Bit((byte) 255, flags), c, accu));
 		instructions.put("363", () -> {
 			cpu.setInterruptMasterEnableImediate(false);
 		});
@@ -316,7 +316,7 @@ public class InstructrionSet
 
 		for (Entry<Character, RegisterOperation> operation : cbOpCodeToOperation.entrySet())
 		{
-			for (Map.Entry<Character, Register8bit> with : opCodeToRegister.entrySet())
+			for (Map.Entry<Character, Register8Bit> with : opCodeToRegister.entrySet())
 			{
 				instructionsCB.put("0" + operation.getKey() + with.getKey(),
 						() -> operation.getValue().invoke(with.getValue()));
@@ -328,7 +328,7 @@ public class InstructrionSet
 				});
 
 				operationQueue.add(() -> {
-					Register8bit shedow = new Register8bit(lowShadow, flags);
+					Register8Bit shedow = new Register8Bit(lowShadow, flags);
 					operation.getValue().invoke(shedow);
 					ram.put(h.load(), l.load(), shedow.load());
 				});
@@ -338,7 +338,7 @@ public class InstructrionSet
 
 		for (Entry<Character, Byte> position : opCodeToPosition.entrySet())
 		{
-			for (Map.Entry<Character, Register8bit> with : opCodeToRegister.entrySet())
+			for (Map.Entry<Character, Register8Bit> with : opCodeToRegister.entrySet())
 			{
 				instructionsCB.put("1" + position.getKey() + with.getKey(),
 						() -> with.getValue().bit(position.getValue()));
@@ -351,7 +351,7 @@ public class InstructrionSet
 			instructionsCB.put("1" + position.getKey() + "6", () -> {
 				operationQueue.add(() -> {
 					lowShadow = ram.load(h.load(), l.load());
-					Register8bit shedow = new Register8bit(lowShadow, flags);
+					Register8Bit shedow = new Register8Bit(lowShadow, flags);
 					shedow.bit(position.getValue());
 				});
 			});
@@ -360,7 +360,7 @@ public class InstructrionSet
 					lowShadow = ram.load(h.load(), l.load());
 				});
 				operationQueue.add(() -> {
-					Register8bit shedow = new Register8bit(lowShadow, flags);
+					Register8Bit shedow = new Register8Bit(lowShadow, flags);
 					shedow.res(position.getValue());
 					ram.put(h.load(), l.load(), shedow.load());
 				});
@@ -370,7 +370,7 @@ public class InstructrionSet
 					lowShadow = ram.load(h.load(), l.load());
 				});
 				operationQueue.add(() -> {
-					Register8bit shedow = new Register8bit(lowShadow, flags);
+					Register8Bit shedow = new Register8Bit(lowShadow, flags);
 					shedow.set(position.getValue());
 					ram.put(h.load(), l.load(), shedow.load());
 				});
@@ -466,7 +466,7 @@ public class InstructrionSet
 		});
 	}
 
-	private void popToRegister(Register16bit sp, Ram ram, Register8bit high, Register8bit low)
+	private void popToRegister(Register16bit sp, Ram ram, Register8Bit high, Register8Bit low)
 	{
 		operationQueue.add(() -> {
 			low.put(ram.load(sp.loadHigh(), sp.loadLow()));
@@ -480,7 +480,7 @@ public class InstructrionSet
 
 	}
 
-	private void pushFromRegister(Register16bit sp, Ram ram, Register8bit high, Register8bit low)
+	private void pushFromRegister(Register16bit sp, Ram ram, Register8Bit high, Register8Bit low)
 	{
 		operationQueue.add(() -> {
 		});
@@ -578,28 +578,28 @@ public class InstructrionSet
 		});
 	}
 
-	private void loadRegisterToRegister(Register8bit from, Register8bit and, Register16bit to)
+	private void loadRegisterToRegister(Register8Bit from, Register8Bit and, Register16bit to)
 	{
 		operationQueue.add(() -> {
 			to.put(from.load(), and.load());
 		});
 	}
 
-	private void loadRamAdressedByRegisterInRegister(Ram ram, Register8bit high, Register8bit low, Register8bit to)
+	private void loadRamAdressedByRegisterInRegister(Ram ram, Register8Bit high, Register8Bit low, Register8Bit to)
 	{
 		operationQueue.add(() -> {
 			to.put(ram.load(high.load(), low.load()));
 		});
 	}
 
-	private void putRegisterInRamAdressedByRegister(Ram ram, Register8bit high, Register8bit low, Register8bit from)
+	private void putRegisterInRamAdressedByRegister(Ram ram, Register8Bit high, Register8Bit low, Register8Bit from)
 	{
 		operationQueue.add(() -> {
 			ram.put(high.load(), low.load(), from.load());
 		});
 	}
 
-	private void loadRamAdressedByImmediate16InRegister(ProgrammCounter pc, Ram ram, Register8bit register)
+	private void loadRamAdressedByImmediate16InRegister(ProgrammCounter pc, Ram ram, Register8Bit register)
 	{
 		operationQueue.add(() -> {
 			lowShadow = ram.load(pc.load());
@@ -614,7 +614,7 @@ public class InstructrionSet
 		});
 	}
 
-	private void putRegisterInRamAdressedByImmediate16(ProgrammCounter pc, Ram ram, Register8bit register)
+	private void putRegisterInRamAdressedByImmediate16(ProgrammCounter pc, Ram ram, Register8Bit register)
 	{
 		operationQueue.add(() -> {
 			lowShadow = ram.load(pc.load());
@@ -630,7 +630,7 @@ public class InstructrionSet
 
 	}
 
-	private void loadHighAndDirect8ToRegister(ProgrammCounter pc, Ram ram, Register8bit to)
+	private void loadHighAndDirect8ToRegister(ProgrammCounter pc, Ram ram, Register8Bit to)
 	{
 		operationQueue.add(() -> {
 			lowShadow = ram.load(pc.load());
@@ -641,7 +641,7 @@ public class InstructrionSet
 		});
 	}
 
-	private void loadRegisterToHighAndDirect8(ProgrammCounter pc, Ram ram, Register8bit from)
+	private void loadRegisterToHighAndDirect8(ProgrammCounter pc, Ram ram, Register8Bit from)
 	{
 		operationQueue.add(() -> {
 			lowShadow = ram.load(pc.load());
@@ -652,14 +652,14 @@ public class InstructrionSet
 		});
 	}
 
-	private void putImmediate8InRegister(ProgrammCounter pc, Ram ram, Register8bit register)
+	private void putImmediate8InRegister(ProgrammCounter pc, Ram ram, Register8Bit register)
 	{
 		operationQueue.add(() -> {
 			register.put(ram.load(pc.load()));
 		});
 	}
 
-	private void loadDirect8ToWhereHLPoints(ProgrammCounter pc, Ram ram, Register8bit h, Register8bit l)
+	private void loadDirect8ToWhereHLPoints(ProgrammCounter pc, Ram ram, Register8Bit h, Register8Bit l)
 	{
 		operationQueue.add(() -> {
 			lowShadow = ram.load(pc.load());
@@ -670,7 +670,7 @@ public class InstructrionSet
 		});
 	}
 
-	private void inc16BitRegister(Flags flags, Register8bit high, Register8bit low)
+	private void inc16BitRegister(Flags flags, Register8Bit high, Register8Bit low)
 	{
 		operationQueue.add(() -> {
 			Register16bit toIncrement = new Register16bit(high.load(), low.load(), flags);
@@ -689,7 +689,7 @@ public class InstructrionSet
 		});
 	}
 
-	private void dcr16BitRegister(Flags flags, Register8bit high, Register8bit low)
+	private void dcr16BitRegister(Flags flags, Register8Bit high, Register8Bit low)
 	{
 		operationQueue.add(() -> {
 			Register16bit toIncrement = new Register16bit(high.load(), low.load(), flags);
@@ -708,33 +708,33 @@ public class InstructrionSet
 		});
 	}
 
-	private void incWhereHLPoints(Flags flags, Ram ram, Register8bit h, Register8bit l)
+	private void incWhereHLPoints(Flags flags, Ram ram, Register8Bit h, Register8Bit l)
 	{
 		operationQueue.add(() -> {
 			lowShadow = ram.load(h.load(), l.load());
 		});
 
 		operationQueue.add(() -> {
-			Register8bit loadetValue = new Register8bit(lowShadow, flags);
+			Register8Bit loadetValue = new Register8Bit(lowShadow, flags);
 			loadetValue.inc();
 			ram.put(h.load(), l.load(), loadetValue.load());
 		});
 	}
 
-	private void dcrWhereHLPoints(Flags flags, Ram ram, Register8bit h, Register8bit l)
+	private void dcrWhereHLPoints(Flags flags, Ram ram, Register8Bit h, Register8Bit l)
 	{
 		operationQueue.add(() -> {
 			lowShadow = ram.load(h.load(), l.load());
 		});
 
 		operationQueue.add(() -> {
-			Register8bit loadetValue = new Register8bit(lowShadow, flags);
+			Register8Bit loadetValue = new Register8Bit(lowShadow, flags);
 			loadetValue.dcr();
 			ram.put(h.load(), l.load(), loadetValue.load());
 		});
 	}
 
-	private void addRegisterToHL(Flags flags, Register8bit h, Register8bit l, Register8bit high, Register8bit low)
+	private void addRegisterToHL(Flags flags, Register8Bit h, Register8Bit l, Register8Bit high, Register8Bit low)
 	{
 		operationQueue.add(() -> {
 			Register16bit hl = new Register16bit(h.load(), l.load(), flags);
@@ -745,7 +745,7 @@ public class InstructrionSet
 		});
 	}
 
-	private void addRegisterToHL(Flags flags, Ram ram, Register8bit h, Register8bit l, Register16bit register)
+	private void addRegisterToHL(Flags flags, Ram ram, Register8Bit h, Register8Bit l, Register16bit register)
 	{
 		operationQueue.add(() -> {
 			Register16bit hl = new Register16bit(h.load(), l.load(), flags);
@@ -756,7 +756,7 @@ public class InstructrionSet
 		});
 	}
 
-	private void putSignedImmediate8PlusSPToHL(ProgrammCounter pc, Flags flags, Ram ram, Register8bit h, Register8bit l,
+	private void putSignedImmediate8PlusSPToHL(ProgrammCounter pc, Flags flags, Ram ram, Register8Bit h, Register8Bit l,
 			Register16bit register)
 	{
 		operationQueue.add(() -> {
@@ -783,7 +783,7 @@ public class InstructrionSet
 		});
 	}
 
-	private void loadDirect16ToRegister(ProgrammCounter pc, Ram ram, Register8bit high, Register8bit low)
+	private void loadDirect16ToRegister(ProgrammCounter pc, Ram ram, Register8Bit high, Register8Bit low)
 	{
 		operationQueue.add(() -> {
 			low.put(ram.load(pc.load()));
@@ -806,7 +806,7 @@ public class InstructrionSet
 
 	}
 
-	private void dcrHL(Register8bit h, Register8bit l, Flags flags)
+	private void dcrHL(Register8Bit h, Register8Bit l, Flags flags)
 	{
 		Register16bit hl = new Register16bit(h.load(), l.load(), flags);
 		hl.dcr();
@@ -814,7 +814,7 @@ public class InstructrionSet
 		l.put(hl.loadLow());
 	}
 
-	private void incHL(Register8bit h, Register8bit l, Flags flags)
+	private void incHL(Register8Bit h, Register8Bit l, Flags flags)
 	{
 		Register16bit hl = new Register16bit(h.load(), l.load(), flags);
 		hl.inc();

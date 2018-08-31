@@ -1,8 +1,12 @@
 package cpu;
 
 import gameboy.MegiHertz;
+import gameboy.TickBasedComponend;
 import ram.Ram;
 
+/**
+ * The 8-bit CPU.
+ */
 public class CPU extends TickBasedComponend
 {
 
@@ -25,17 +29,17 @@ public class CPU extends TickBasedComponend
 	private InterruptEnableRegister interruptEnable;
 	private InterruptFlagRegister interruptFlag;
 
-	private Register8bit b;
-	private Register8bit c;
-	private Register8bit d;
-	private Register8bit e;
-	private Register8bit h;
-	private Register8bit l;
+	private Register8Bit b;
+	private Register8Bit c;
+	private Register8Bit d;
+	private Register8Bit e;
+	private Register8Bit h;
+	private Register8Bit l;
 
 	private InstructrionSet instructionSet;
 
-	public CPU(Ram ram, Accumulator accu, ProgrammCounter pc, Register16bit sp, Register8bit b, Register8bit c,
-			Register8bit d, Register8bit e, Register8bit h, Register8bit l, Flags flags,
+	public CPU(Ram ram, Accumulator accu, ProgrammCounter pc, Register16bit sp, Register8Bit b, Register8Bit c,
+			Register8Bit d, Register8Bit e, Register8Bit h, Register8Bit l, Flags flags,
 			InterruptEnableRegister interruptEnable, InterruptFlagRegister interruptFlag)
 	{
 		super(MegiHertz.get(1));
@@ -69,7 +73,7 @@ public class CPU extends TickBasedComponend
 		{
 			return true;
 		}
-		
+
 		if (!instructionSet.isOperationQueueEmpty())
 		{
 			instructionSet.pollFromOperationQueue().invokeOperation();
@@ -181,6 +185,13 @@ public class CPU extends TickBasedComponend
 		this.state = state;
 	}
 
+	/**
+	 * Loads the current opcode from ram and parse it to a 3 digit octal string.
+	 * 
+	 * @param pc The current program counter.
+	 * @param ram The ram the opcode should be loaded from.
+	 * @return The opcode as a 3 digit octal string.
+	 */
 	public String loadOctalOpCode(ProgrammCounter pc, Ram ram)
 	{
 		StringBuilder octalNumber = new StringBuilder(Integer.toOctalString(Byte.toUnsignedInt(ram.load(pc.load()))));
@@ -202,32 +213,32 @@ public class CPU extends TickBasedComponend
 		return accu;
 	}
 
-	public Register8bit getB()
+	public Register8Bit getB()
 	{
 		return b;
 	}
 
-	public Register8bit getC()
+	public Register8Bit getC()
 	{
 		return c;
 	}
 
-	public Register8bit getD()
+	public Register8Bit getD()
 	{
 		return d;
 	}
 
-	public Register8bit getE()
+	public Register8Bit getE()
 	{
 		return e;
 	}
 
-	public Register8bit getH()
+	public Register8Bit getH()
 	{
 		return h;
 	}
 
-	public Register8bit getL()
+	public Register8Bit getL()
 	{
 		return l;
 	}

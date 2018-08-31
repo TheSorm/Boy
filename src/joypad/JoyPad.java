@@ -4,7 +4,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 import cpu.InterruptFlagRegister;
-import cpu.TickBasedComponend;
+import gameboy.TickBasedComponend;
 
 public class JoyPad extends TickBasedComponend implements KeyListener
 {

@@ -1,6 +1,4 @@
-package cpu;
-
-import gameboy.MegiHertz;
+package gameboy;
 
 public abstract class TickBasedComponend
 {

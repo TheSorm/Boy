@@ -2,6 +2,10 @@ package cartridge;
 
 import ram.RamSpace;
 
+/**
+ * Filler for the RAM space when the RAM is disabled. Writes have no effect and
+ * reads are always 0xFF.
+ */
 public class DisabledSwitchableRamBank extends RamSpace
 {
 	private final static int START_ADRESS = 0xA000;
@@ -20,6 +24,6 @@ public class DisabledSwitchableRamBank extends RamSpace
 	@Override
 	public byte load(int adress)
 	{
-		return (byte) 0xff;
+		return (byte) 0xFF;
 	}
 }

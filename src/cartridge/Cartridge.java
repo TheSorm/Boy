@@ -2,11 +2,13 @@ package cartridge;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import cpu.TickBasedComponend;
-import gameboy.MegiHertz;
 import ram.ReadableWriteable;
 
+/**
+ * The standard 32Kb ROM only cartridge. The ROM is directly mapped to memory at
+ * 0x0 to 0x8000. The program can also use up to 8Kb of RAM mapped from 0xA000
+ * to 0xC000.
+ */
 public class Cartridge implements ReadableWriteable
 {
 	Map<Integer, ReadableWriteable> memoryMap;
@@ -59,6 +61,17 @@ public class Cartridge implements ReadableWriteable
 		return this.switchableRamBank.getEndAdress();
 	}
 
+	/**
+	 * Maps the given readable and writable object to the given location of the
+	 * cartridge.
+	 * 
+	 * @param startAddress The first address where the object should be mapped
+	 *            to.
+	 * @param endAddress The last address (exclusive) where the object should be
+	 *            mapped to.
+	 * @param value The readable and writable object that should be mapped to
+	 *            the cartridge.
+	 */
 	public void map(int startAddress, int endAddress, ReadableWriteable value)
 	{
 		for (int i = startAddress; i < endAddress; i++)
@@ -67,6 +80,13 @@ public class Cartridge implements ReadableWriteable
 		}
 	}
 
+	/**
+	 * Creates the right cartridge for the given ROM file dependent of the ROM
+	 * header.
+	 * 
+	 * @param pathToRom The system path to the ROM file.
+	 * @return The right cartridge. (null if there is no suitable cartridge)
+	 */
 	public static Cartridge getCartridge(String pathToRom)
 	{
 		if (pathToRom.length() == 0)

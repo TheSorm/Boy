@@ -2,6 +2,10 @@ package cartridge;
 
 import ram.RamSpace;
 
+/**
+ * External RAM from cartridge, it can be battery buffered and has normally a
+ * size of 8Kb.
+ */
 public class SwitchableRamBank extends RamSpace
 {
 	private final static int START_ADRESS = 0xA000;

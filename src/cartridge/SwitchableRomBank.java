@@ -2,6 +2,9 @@ package cartridge;
 
 import ram.RamSpace;
 
+/**
+ * Contains another 16Kb of ROM data. Can be switched by a MBC.
+ */
 public class SwitchableRomBank extends RamSpace
 {
 	private final static int START_ADRESS = 0x4000;
@@ -11,11 +14,6 @@ public class SwitchableRomBank extends RamSpace
 	{
 		super(START_ADRESS, END_ADRESS);
 
-		put(data);
-	}
-
-	private void put(int[] data)
-	{
 		for (int i = 0; i < data.length; i++)
 		{
 			put(startAdress + i, (byte) data[i]);

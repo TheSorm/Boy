@@ -3,6 +3,11 @@ package cartridge;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * With the memory bank controller 1 the cartridge can have up to 2MB of ROM
+ * and/or 32Kb of RAM. The Chip is controlled by writing to different ROM
+ * locations located between 0x0 and 0x8000.
+ */
 public class CartridgeWithMBC1 extends Cartridge
 {
 	private static final int CHOSE_ROM_OR_RAM_MODE_END = 0x8000;
@@ -92,7 +97,7 @@ public class CartridgeWithMBC1 extends Cartridge
 		}
 		else if (adress >= CHOSE_ROM_OR_RAM_MODE_START && adress < CHOSE_ROM_OR_RAM_MODE_END)
 		{
-			enableMode(Byte.toUnsignedInt(input) == 1);
+			changeMode(Byte.toUnsignedInt(input) == 1);
 			changeRamBank();
 			changeRomBank();
 			changeRom0Bank();
@@ -104,7 +109,7 @@ public class CartridgeWithMBC1 extends Cartridge
 
 	}
 
-	private void enableMode(boolean mode)
+	private void changeMode(boolean mode)
 	{
 		if (mode)
 		{

@@ -45,7 +45,7 @@ public class Register8Bit
 	 */
 	public void inc()
 	{
-		flags.setHalfCarryFlag(loadUnsigned() == FULL_NIPPLE);
+		flags.setHalfCarryFlag((loadUnsigned() & FULL_NIPPLE) == FULL_NIPPLE);
 
 		signedRegisterValue = (byte) (loadUnsigned() + 1);
 
@@ -63,7 +63,7 @@ public class Register8Bit
 	 */
 	public void dcr()
 	{
-		flags.setHalfCarryFlag(loadUnsigned() == EMPTY_NIPPLE);
+		flags.setHalfCarryFlag((loadUnsigned() & FULL_NIPPLE) == EMPTY_NIPPLE);
 
 		signedRegisterValue = (byte) (loadUnsigned() - 1);
 

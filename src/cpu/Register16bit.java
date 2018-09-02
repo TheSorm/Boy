@@ -6,7 +6,7 @@ public class Register16bit
 	protected static final int FULL_BYTE = 0b1111_1111;
 	protected static final int FULL_NIPPLE_FULL_BYTE = 0b1111_1111_1111;
 
-	protected short registerValue;
+	protected short signedRegisterValue;
 	protected Flags flags;
 
 	public Register16bit(short value, Flags flags)
@@ -23,7 +23,7 @@ public class Register16bit
 
 	public void put(byte high, byte low)
 	{
-		registerValue = combineTo16Bit(high, low);
+		signedRegisterValue = combineTo16Bit(high, low);
 	}
 
 	private short combineTo16Bit(byte high, byte low)
@@ -38,62 +38,101 @@ public class Register16bit
 
 	public void put(short value)
 	{
-		registerValue = value;
+		signedRegisterValue = value;
 	}
 
 	public short load()
 	{
-		return registerValue;
+		return signedRegisterValue;
+	}
+
+	public int loadUnsigned()
+	{
+		return Short.toUnsignedInt(signedRegisterValue);
 	}
 
 	public byte loadLow()
 	{
-		return (byte) Short.toUnsignedInt(registerValue);
+		return (byte) loadUnsigned();
 	}
 
 	public byte loadHigh()
 	{
-		short result = (short) (registerValue >>> 8);
-		return (byte) Short.toUnsignedInt(result);
+		return (byte) (loadUnsigned() >>> 8);
 	}
 
+	/**
+	 * Increments the register value by 1.
+	 * 
+	 * @CarryFlag: Not changed.
+	 * @HalfCarryFlag: Not changed.
+	 * @SubtractFlag: Not changed.
+	 * @ZeroFlag: Not changed.
+	 */
 	public void inc()
 	{
-		registerValue = (short) (Short.toUnsignedInt(registerValue) + 1);
+		signedRegisterValue = (short) (Short.toUnsignedInt(signedRegisterValue) + 1);
 	}
 
+	/**
+	 * Decrements the register value by 1.
+	 * 
+	 * @CarryFlag: Not changed.
+	 * @HalfCarryFlag: Not changed.
+	 * @SubtractFlag: Not changed.
+	 * @ZeroFlag: Not changed.
+	 */
 	public void dcr()
 	{
-		registerValue = (short) (Short.toUnsignedInt(registerValue) - 1);
+		signedRegisterValue = (short) (Short.toUnsignedInt(signedRegisterValue) - 1);
 	}
 
 	public void add(byte high, byte low)
 	{
 		this.add(combineTo16Bit(high, low));
-
 	}
 
+	/**
+	 * Adds the given value to the register value.
+	 * 
+	 * @CarryFlag: Set if result is greater than a full short.
+	 * @HalfCarryFlag: Set if both lower bytes and upper lower nipple added
+	 *                 together are greater than a full lower bytes and upper
+	 *                 lower nipple.
+	 * @SubtractFlag: Reset.
+	 * @ZeroFlag: Not changed.
+	 */
 	public void add(short value)
 	{
-		int result = Short.toUnsignedInt(registerValue) + Short.toUnsignedInt(value);
+		int result = Short.toUnsignedInt(signedRegisterValue) + Short.toUnsignedInt(value);
 
 		flags.setCarryFlag(result > FULL_SHORT);
-		flags.setHalfCarryFlag((Short.toUnsignedInt(registerValue) & FULL_NIPPLE_FULL_BYTE)
+		flags.setHalfCarryFlag((Short.toUnsignedInt(signedRegisterValue) & FULL_NIPPLE_FULL_BYTE)
 				+ (Short.toUnsignedInt(value) & FULL_NIPPLE_FULL_BYTE) > FULL_NIPPLE_FULL_BYTE);
 
 		flags.setSubtractFlag(false);
 
-		registerValue = (short) result;
+		signedRegisterValue = (short) result;
 	}
 
+	/**
+	 * Adds the given value to the register value.
+	 * 
+	 * @CarryFlag: Set if lower bytes added together are greater than a full
+	 *             byte.
+	 * @HalfCarryFlag: Set if both lower nipple added together are greater than
+	 *                 a full nipple.
+	 * @SubtractFlag: Reset.
+	 * @ZeroFlag: Reset.
+	 */
 	public void addSigned(byte value)
 	{
-		int result = Short.toUnsignedInt(registerValue) + value;
-		flags.setCarryFlag((((Short.toUnsignedInt(registerValue) & 0xff) + (value & 0xff)) & 0x100) != 0);
-		flags.setHalfCarryFlag((((Short.toUnsignedInt(registerValue) & 0x0f) + (value & 0x0f)) & 0x10) != 0);
+		int result = Short.toUnsignedInt(signedRegisterValue) + value;
+		flags.setCarryFlag((((Short.toUnsignedInt(signedRegisterValue) & 0xff) + (value & 0xff)) & 0x100) != 0);
+		flags.setHalfCarryFlag((((Short.toUnsignedInt(signedRegisterValue) & 0x0f) + (value & 0x0f)) & 0x10) != 0);
 		flags.setZeroFlag(false);
 		flags.setSubtractFlag(false);
 
-		registerValue = (short) result;
+		signedRegisterValue = (short) result;
 	}
 }

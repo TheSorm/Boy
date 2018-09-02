@@ -1,5 +1,8 @@
 package cpu;
 
+/**
+ * The programm counter/pointer of the CPU.
+ */
 public class ProgrammCounter extends Register16bit
 {
 
@@ -28,7 +31,7 @@ public class ProgrammCounter extends Register16bit
 
 	public void addSignedNoFlags(byte value)
 	{
-		int result = Short.toUnsignedInt(registerValue) + value;
-		registerValue = (short) result;
+		int result = Short.toUnsignedInt(signedRegisterValue) + value;
+		signedRegisterValue = (short) result;
 	}
 }

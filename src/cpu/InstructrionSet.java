@@ -9,6 +9,10 @@ import java.util.Queue;
 import cpu.CPU.State;
 import ram.Ram;
 
+/**
+ * Instruction set of the CPU, containing all instructions connected to their
+ * opcodes.
+ */
 public class InstructrionSet
 {
 
@@ -22,7 +26,7 @@ public class InstructrionSet
 		public boolean evaluate();
 	}
 
-	private interface ByteInputOperation
+	private interface AccumulatorInstructions
 	{
 		public void invoke(byte value);
 	}
@@ -81,7 +85,7 @@ public class InstructrionSet
 		opCodeToRegisterPairLow.put('4', new RegisterPair(h, l));
 		opCodeToRegisterPairHigh.put('5', new RegisterPair(h, l));
 
-		HashMap<Character, ByteInputOperation> opCodeToOperation = new HashMap<>();
+		HashMap<Character, AccumulatorInstructions> opCodeToOperation = new HashMap<>();
 		opCodeToOperation.put('0', (byte value) -> accu.add(value));
 		opCodeToOperation.put('1', (byte value) -> accu.adC(value));
 		opCodeToOperation.put('2', (byte value) -> accu.sub(value));
@@ -130,39 +134,37 @@ public class InstructrionSet
 		for (Entry<Character, RegisterPair> from : opCodeToRegisterPairLow.entrySet())
 		{
 			instructions.put("0" + from.getKey() + "1",
-					() -> loadDirect16ToRegister(pc, ram, from.getValue().first, from.getValue().second));
+					() -> ld_R1R2_d16(pc, ram, from.getValue().first, from.getValue().second));
 			instructions.put("0" + from.getKey() + "2",
-					() -> putRegisterInRamAdressedByRegister(ram, from.getValue().first, from.getValue().second, accu));
+					() -> ld_aR1R2_R3(ram, from.getValue().first, from.getValue().second, accu));
 			instructions.put("0" + from.getKey() + "3",
-					() -> inc16BitRegister(flags, from.getValue().first, from.getValue().second));
+					() -> inc_R1R2(flags, from.getValue().first, from.getValue().second));
 
 			instructions.put("3" + from.getKey() + "1",
-					() -> popToRegister(sp, ram, from.getValue().first, from.getValue().second));
+					() -> popNN(sp, ram, from.getValue().first, from.getValue().second));
 			instructions.put("3" + from.getKey() + "5",
-					() -> pushFromRegister(sp, ram, from.getValue().first, from.getValue().second));
+					() -> pushNN(sp, ram, from.getValue().first, from.getValue().second));
 		}
 
 		for (Entry<Character, RegisterPair> from : opCodeToRegisterPairHigh.entrySet())
 		{
 			instructions.put("0" + from.getKey() + "1",
-					() -> addRegisterToHL(flags, h, l, from.getValue().first, from.getValue().second));
-			instructions.put("0" + from.getKey() + "2", () -> loadRamAdressedByRegisterInRegister(ram,
-					from.getValue().first, from.getValue().second, accu));
+					() -> add_HL_R1R2(flags, h, l, from.getValue().first, from.getValue().second));
+			instructions.put("0" + from.getKey() + "2",
+					() -> ld_R1_aR2R3(ram, from.getValue().first, from.getValue().second, accu));
 			instructions.put("0" + from.getKey() + "3",
-					() -> dcr16BitRegister(flags, from.getValue().first, from.getValue().second));
+					() -> dec_R1R2(flags, from.getValue().first, from.getValue().second));
 		}
 
 		instructions.put("000", () -> {
 		});
-		instructions.put("010", () -> loadStackPointerToDirect16(pc, sp, flags, ram));
-		instructions.put("020", () -> {
-			cpu.setState(State.STOP);
-		});
-		instructions.put("030", () -> conditionalJumpAddSignedImeadiate8(pc, ram, true));
-		instructions.put("040", () -> conditionalJumpAddSignedImeadiate8(pc, ram, !flags.isZeroFlag()));
-		instructions.put("050", () -> conditionalJumpAddSignedImeadiate8(pc, ram, flags.isZeroFlag()));
-		instructions.put("060", () -> conditionalJumpAddSignedImeadiate8(pc, ram, !flags.isCarryFlag()));
-		instructions.put("070", () -> conditionalJumpAddSignedImeadiate8(pc, ram, flags.isCarryFlag()));
+		instructions.put("010", () -> ld_a16_SP(pc, sp, flags, ram));
+		instructions.put("020", () -> cpu.setState(State.STOP));
+		instructions.put("030", () -> jrCCN(pc, ram, true));
+		instructions.put("040", () -> jrCCN(pc, ram, !flags.isZeroFlag()));
+		instructions.put("050", () -> jrCCN(pc, ram, flags.isZeroFlag()));
+		instructions.put("060", () -> jrCCN(pc, ram, !flags.isCarryFlag()));
+		instructions.put("070", () -> jrCCN(pc, ram, flags.isCarryFlag()));
 
 		instructions.put("007", () -> accu.rlca());
 		instructions.put("017", () -> accu.rrca());
@@ -173,46 +175,29 @@ public class InstructrionSet
 		instructions.put("067", () -> flags.scf());
 		instructions.put("077", () -> flags.ccf());
 
-		instructions.put("042", () -> {
-			operationQueue.add(() -> {
-				ram.put(h.load(), l.load(), accu.load());
-				incHL(h, l, flags);
-			});
-		});
-		instructions.put("052", () -> {
-			operationQueue.add(() -> {
-				accu.put(ram.load(h.load(), l.load()));
-				incHL(h, l, flags);
-			});
-		});
-		instructions.put("062", () -> {
-			operationQueue.add(() -> {
-				ram.put(h.load(), l.load(), accu.load());
-				dcrHL(h, l, flags);
-			});
-		});
-		instructions.put("072", () -> {
-			operationQueue.add(() -> {
-				accu.put(ram.load(h.load(), l.load()));
-				dcrHL(h, l, flags);
-			});
-		});
+		instructions.put("042", () -> ld_aHLInc_A(ram, accu, h, l, flags));
 
-		instructions.put("061", () -> loadDirect16ToRegister(pc, ram, sp));
-		instructions.put("071", () -> addRegisterToHL(flags, ram, h, l, sp));
+		instructions.put("052", () -> ld_A_aHLInc(ram, accu, h, l, flags));
 
-		instructions.put("063", () -> inc16BitRegister(sp));
-		instructions.put("073", () -> dcr16BitRegister(sp));
+		instructions.put("062", () -> ld_aHLDec_A(ram, accu, h, l, flags));
 
-		instructions.put("064", () -> incWhereHLPoints(flags, ram, h, l));
-		instructions.put("065", () -> dcrWhereHLPoints(flags, ram, h, l));
-		instructions.put("066", () -> loadDirect8ToWhereHLPoints(pc, ram, h, l));
+		instructions.put("072", () -> ld_A_aHLDec(ram, accu, h, l, flags));
+
+		instructions.put("061", () -> ld_R_d16(pc, ram, sp));
+		instructions.put("071", () -> add_HL_R(flags, ram, h, l, sp));
+
+		instructions.put("063", () -> inc_R(sp));
+		instructions.put("073", () -> dec_R(sp));
+
+		instructions.put("064", () -> inc_aHL(flags, ram, h, l));
+		instructions.put("065", () -> dec_aHL(flags, ram, h, l));
+		instructions.put("066", () -> ld_aHL_d8(pc, ram, h, l));
 
 		for (Map.Entry<Character, Register8Bit> from : opCodeToRegister.entrySet())
 		{
 			instructions.put("0" + from.getKey() + "4", () -> from.getValue().inc());
 			instructions.put("0" + from.getKey() + "5", () -> from.getValue().dcr());
-			instructions.put("0" + from.getKey() + "6", () -> putImmediate8InRegister(pc, ram, from.getValue()));
+			instructions.put("0" + from.getKey() + "6", () -> ld_R1_d8(pc, ram, from.getValue()));
 
 			for (Map.Entry<Character, Register8Bit> into : opCodeToRegister.entrySet())
 			{
@@ -220,18 +205,14 @@ public class InstructrionSet
 						() -> into.getValue().put(from.getValue().load()));
 			}
 
-			instructions.put("1" + from.getKey() + "6",
-					() -> this.loadRamAdressedByRegisterInRegister(ram, h, l, from.getValue()));
+			instructions.put("1" + from.getKey() + "6", () -> this.ld_R1_aR2R3(ram, h, l, from.getValue()));
 
-			instructions.put("1" + "6" + from.getKey(),
-					() -> this.putRegisterInRamAdressedByRegister(ram, h, l, from.getValue()));
+			instructions.put("1" + "6" + from.getKey(), () -> this.ld_aR1R2_R3(ram, h, l, from.getValue()));
 		}
 
-		instructions.put("166", () -> {
-			cpu.setState(State.HALT);
-		});
+		instructions.put("166", () -> cpu.setState(State.HALT));
 
-		for (Map.Entry<Character, ByteInputOperation> operation : opCodeToOperation.entrySet())
+		for (Map.Entry<Character, AccumulatorInstructions> operation : opCodeToOperation.entrySet())
 		{
 			for (Map.Entry<Character, Register8Bit> with : opCodeToRegister.entrySet())
 			{
@@ -252,65 +233,41 @@ public class InstructrionSet
 		for (byte opKey = 0; opKey < 8; opKey++)
 		{
 			final byte adress = (byte) (opKey * 8);
-			instructions.put("3" + opKey + "7", () -> restartAt(pc, sp, ram, adress));
+			instructions.put("3" + opKey + "7", () -> rst(pc, sp, ram, adress));
 		}
 
 		for (Entry<Character, Condition> condition : opCodeToCondition.entrySet())
 		{
-			instructions.put("3" + condition.getKey() + "0",
-					() -> conditionalReturn(pc, sp, ram, condition.getValue().evaluate()));
-			instructions.put("3" + condition.getKey() + "2",
-					() -> conditionalJumpToDirect16(pc, ram, condition.getValue().evaluate()));
+			instructions.put("3" + condition.getKey() + "0", () -> retCC(pc, sp, ram, condition.getValue().evaluate()));
+			instructions.put("3" + condition.getKey() + "2", () -> jpCCNN(pc, ram, condition.getValue().evaluate()));
 			instructions.put("3" + condition.getKey() + "4",
-					() -> conditionalCall(pc, sp, ram, condition.getValue().evaluate()));
+					() -> callCCNN(pc, sp, ram, condition.getValue().evaluate()));
 
 		}
 
-		instructions.put("303", () -> conditionalJumpToDirect16(pc, ram, true));
-		instructions.put("311", () -> normalReturn(pc, sp, ram));
-		instructions.put("313", () -> this.invokeCBInstruction(pc, ram, cpu));
-		instructions.put("315", () -> conditionalCall(pc, sp, ram, true));
-		instructions.put("331", () -> {
-			operationQueue.add(() -> {
-				pc.put(pc.loadHigh(), ram.load(sp.loadHigh(), sp.loadLow()));
-				sp.inc();
-			});
+		instructions.put("303", () -> jpCCNN(pc, ram, true));
+		instructions.put("311", () -> ret(pc, sp, ram));
+		instructions.put("313", () -> this.prefixCB(pc, ram, cpu));
+		instructions.put("315", () -> callCCNN(pc, sp, ram, true));
+		instructions.put("331", () -> reti(cpu, ram, pc, sp));
 
-			operationQueue.add(() -> {
-				pc.put(ram.load(sp.loadHigh(), sp.loadLow()), pc.loadLow());
-				sp.inc();
-			});
+		instructions.put("340", () -> ldh_a8_A(pc, ram, accu));
+		instructions.put("342", () -> ld_aR1R2_R3(ram, new Register8Bit((byte) 255, flags), c, accu));
 
-			operationQueue.add(() -> {
-				cpu.setInterruptMasterEnableImediate(true);
-			});
-		});
+		instructions.put("350", () -> add_SP_r8(pc, ram, sp));
+		instructions.put("351", () -> pc.put(h.load(), l.load()));
+		instructions.put("352", () -> ld_a16_A(pc, ram, accu));
 
-		instructions.put("340", () -> loadRegisterToHighAndDirect8(pc, ram, accu));
-		instructions.put("342",
-				() -> putRegisterInRamAdressedByRegister(ram, new Register8Bit((byte) 255, flags), c, accu));
+		instructions.put("360", () -> ldh_A_a8(pc, ram, accu));
+		instructions.put("361", () -> popNN(sp, ram, accu, flags));
+		instructions.put("362", () -> ld_R1_aR2R3(ram, new Register8Bit((byte) 255, flags), c, accu));
+		instructions.put("363", () -> cpu.setInterruptMasterEnableImediate(false));
+		instructions.put("365", () -> pushNN(sp, ram, accu, flags));
 
-		instructions.put("350", () -> addSignedDirect8ToRegister(pc, ram, sp));
-		instructions.put("351", () -> {
-			pc.put(h.load(), l.load());
-		});
-		instructions.put("352", () -> putRegisterInRamAdressedByImmediate16(pc, ram, accu));
-
-		instructions.put("360", () -> loadHighAndDirect8ToRegister(pc, ram, accu));
-		instructions.put("361", () -> popToRegister(sp, ram, accu, flags));
-		instructions.put("362",
-				() -> loadRamAdressedByRegisterInRegister(ram, new Register8Bit((byte) 255, flags), c, accu));
-		instructions.put("363", () -> {
-			cpu.setInterruptMasterEnableImediate(false);
-		});
-		instructions.put("365", () -> pushFromRegister(sp, ram, accu, flags));
-
-		instructions.put("370", () -> putSignedImmediate8PlusSPToHL(pc, flags, ram, h, l, sp));
-		instructions.put("371", () -> loadRegisterToRegister(h, l, sp));
-		instructions.put("372", () -> loadRamAdressedByImmediate16InRegister(pc, ram, accu));
-		instructions.put("373", () -> {
-			cpu.setInterruptMasterEnableDelayed(true);
-		});
+		instructions.put("370", () -> ld_HL_SPr8(pc, flags, ram, h, l, sp));
+		instructions.put("371", () -> ld_SP_HL(h, l, sp));
+		instructions.put("372", () -> ld_A_a16(pc, ram, accu));
+		instructions.put("373", () -> cpu.setInterruptMasterEnableDelayed(true));
 
 		instructionsCB = new HashMap<>();
 
@@ -378,14 +335,115 @@ public class InstructrionSet
 		}
 	}
 
-	private void invokeCBInstruction(ProgrammCounter pc, Ram ram, CPU cpu)
+	/**
+	 * Returns and enables interrupts afterward.
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: nn read, Memory access for low byte
+	 * @Cycle2: nn read, Memory access for high byte
+	 * @Cycle3: Interrupt master enable
+	 */
+	private void reti(CPU cpu, Ram ram, ProgrammCounter pc, Register16bit sp)
+	{
+		operationQueue.add(() -> {
+			pc.put(pc.loadHigh(), ram.load(sp.loadHigh(), sp.loadLow()));
+			sp.inc();
+		});
+
+		operationQueue.add(() -> {
+			pc.put(ram.load(sp.loadHigh(), sp.loadLow()), pc.loadLow());
+			sp.inc();
+		});
+
+		operationQueue.add(() -> {
+			cpu.setInterruptMasterEnableImediate(true);
+		});
+	}
+
+	/**
+	 * Loads the Ram that is addressed by the given registers to the
+	 * accumulator. Decrements the address registers afterward.
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: n read, Memory access and decrement of registers
+	 */
+	private void ld_A_aHLDec(Ram ram, Accumulator accu, Register8Bit h, Register8Bit l, Flags flags)
+	{
+		operationQueue.add(() -> {
+			accu.put(ram.load(h.load(), l.load()));
+			decrementHL(h, l, flags);
+		});
+	}
+
+	/**
+	 * Puts the Accumulator to Ram that is addressed by the given registers.
+	 * Decrements the address registers afterward.
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: n write, Memory access and decrement of registers
+	 */
+	private void ld_aHLDec_A(Ram ram, Accumulator accu, Register8Bit h, Register8Bit l, Flags flags)
+	{
+		operationQueue.add(() -> {
+			ram.put(h.load(), l.load(), accu.load());
+			decrementHL(h, l, flags);
+		});
+	}
+
+	/**
+	 * Loads the Ram that is addressed by the given registers to the
+	 * accumulator. Increment the address registers afterward.
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: n read, Memory access and increment of registers
+	 */
+	private void ld_A_aHLInc(Ram ram, Accumulator accu, Register8Bit h, Register8Bit l, Flags flags)
+	{
+		operationQueue.add(() -> {
+			accu.put(ram.load(h.load(), l.load()));
+			incrementHL(h, l, flags);
+		});
+	}
+
+	/**
+	 * Puts the Accumulator to Ram that is addressed by the given registers.
+	 * Increment the address registers afterward.
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: n write, Memory access and increment of registers
+	 */
+	private void ld_aHLInc_A(Ram ram, Accumulator accu, Register8Bit h, Register8Bit l, Flags flags)
+	{
+		operationQueue.add(() -> {
+			ram.put(h.load(), l.load(), accu.load());
+			incrementHL(h, l, flags);
+		});
+	}
+
+	/**
+	 * Executes the next instruction in RAM as it is a CB instruction.
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: n read, Memory access for the opcode and invocation of the
+	 *          fitting cb instruction.
+	 */
+	private void prefixCB(ProgrammCounter pc, Ram ram, CPU cpu)
 	{
 		operationQueue.add(() -> {
 			instructionsCB.get(cpu.loadOctalOpCode(pc, ram)).invoke();
 		});
 	}
 
-	public void restartAt(ProgrammCounter pc, Register16bit sp, Ram ram, byte adress)
+	/**
+	 * Restart for software interrupts, acts like a fast call to special
+	 * addresses.
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: Internal delay
+	 * @Cycle2: Pc push, Memory access for high byte
+	 * @Cycle3: Pc push, Memory access for low byte
+	 */
+	public void rst(ProgrammCounter pc, Register16bit sp, Ram ram, byte adress)
 	{
 		operationQueue.add(() -> {
 		});
@@ -403,7 +461,18 @@ public class InstructrionSet
 
 	}
 
-	public void restartAt(ProgrammCounter pc, Register16bit sp, Ram ram, InterruptFlagRegister adress,
+	/**
+	 * Restart for hardware interrupts, acts like a fast call to special
+	 * addresses.
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: Internal delay
+	 * @Cycle2: Internal delay
+	 * @Cycle3: Internal delay
+	 * @Cycle4: Pc push, Memory access for high byte and saving of jump address
+	 * @Cycle5: Pc push, Memory access for low byte and put jump address into pc
+	 */
+	public void rst(ProgrammCounter pc, Register16bit sp, Ram ram, InterruptFlagRegister adress,
 			InterruptEnableRegister interruptEnable)
 	{
 		operationQueue.add(() -> {
@@ -422,11 +491,20 @@ public class InstructrionSet
 			sp.dcr();
 			ram.put(sp.loadHigh(), sp.loadLow(), pc.loadLow());
 			pc.put(lowShadow);
-
 		});
 	}
 
-	private void conditionalReturn(ProgrammCounter pc, Register16bit sp, Ram ram, boolean condition)
+	/**
+	 * Returns to last address on the stack if condition is true
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: Internal delay
+	 * @End: if condition is false, else continue
+	 * @Cycle2: Pc pop, Memory access for low byte
+	 * @Cycle3: Pc pop, Memory access for high byte
+	 * @Cycle4: Internal delay
+	 */
+	private void retCC(ProgrammCounter pc, Register16bit sp, Ram ram, boolean condition)
 	{
 		operationQueue.add(() -> {
 		});
@@ -445,12 +523,18 @@ public class InstructrionSet
 
 			operationQueue.add(() -> {
 			});
-
 		}
-
 	}
 
-	private void normalReturn(ProgrammCounter pc, Register16bit sp, Ram ram)
+	/**
+	 * Returns to last address on the stack
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: Pc pop, Memory access for low byte
+	 * @Cycle2: Pc pop, Memory access for high byte
+	 * @Cycle3: Internal delay
+	 */
+	private void ret(ProgrammCounter pc, Register16bit sp, Ram ram)
 	{
 		operationQueue.add(() -> {
 			pc.put(pc.loadHigh(), ram.load(sp.loadHigh(), sp.loadLow()));
@@ -466,7 +550,14 @@ public class InstructrionSet
 		});
 	}
 
-	private void popToRegister(Register16bit sp, Ram ram, Register8Bit high, Register8Bit low)
+	/**
+	 * Pops two values from stack to registers.
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: low pop, Memory access for low byte
+	 * @Cycle2: high pop, Memory access for high byte
+	 */
+	private void popNN(Register16bit sp, Ram ram, Register8Bit high, Register8Bit low)
 	{
 		operationQueue.add(() -> {
 			low.put(ram.load(sp.loadHigh(), sp.loadLow()));
@@ -477,10 +568,17 @@ public class InstructrionSet
 			high.put(ram.load(sp.loadHigh(), sp.loadLow()));
 			sp.inc();
 		});
-
 	}
 
-	private void pushFromRegister(Register16bit sp, Ram ram, Register8Bit high, Register8Bit low)
+	/**
+	 * Pushes two values from registers to the stack
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: Internal delay
+	 * @Cycle2: high push, Memory access for high byte
+	 * @Cycle3: low push, Memory access for low byte
+	 */
+	private void pushNN(Register16bit sp, Ram ram, Register8Bit high, Register8Bit low)
 	{
 		operationQueue.add(() -> {
 		});
@@ -497,7 +595,18 @@ public class InstructrionSet
 
 	}
 
-	private void conditionalCall(ProgrammCounter pc, Register16bit sp, Ram ram, boolean condition)
+	/**
+	 * Calls an address if condition is true
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: nn read, Memory access for low byte
+	 * @Cycle2: nn read, Memory access for high byte
+	 * @End: if condition is false, else continue
+	 * @Cycle3: Internal delay
+	 * @Cycle4: Pc push, Memory access for low byte
+	 * @Cycle5: Pc push, Memory access for high byte and new address to pc
+	 */
+	private void callCCNN(ProgrammCounter pc, Register16bit sp, Ram ram, boolean condition)
 	{
 		operationQueue.add(() -> {
 			lowShadow = ram.load(pc.load());
@@ -511,6 +620,7 @@ public class InstructrionSet
 		{
 			operationQueue.add(() -> {
 			});
+
 			operationQueue.add(() -> {
 				sp.dcr();
 				ram.put(sp.loadHigh(), sp.loadLow(), pc.loadHigh());
@@ -525,7 +635,14 @@ public class InstructrionSet
 
 	}
 
-	private void conditionalJumpAddSignedImeadiate8(ProgrammCounter pc, Ram ram, boolean condition)
+	/**
+	 * If condition is true, adds the value as an signed value to the pc
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: n read, Memory access
+	 * @Cycle2: Internal delay and adding to pc
+	 */
+	private void jrCCN(ProgrammCounter pc, Ram ram, boolean condition)
 	{
 		operationQueue.add(() -> {
 			lowShadow = ram.load(pc.load());
@@ -540,7 +657,16 @@ public class InstructrionSet
 
 	}
 
-	private void conditionalJumpToDirect16(ProgrammCounter pc, Ram ram, boolean condition)
+	/**
+	 * If condition is true, jumps to the loaded address
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: nn read, Memory access for low byte
+	 * @Cycle2: nn read, Memory access for high byte
+	 * @End: if condition is false, else continue
+	 * @Cycle3: Internal delay and putting loadet adress to pc
+	 */
+	private void jpCCNN(ProgrammCounter pc, Ram ram, boolean condition)
 	{
 		operationQueue.add(() -> {
 			lowShadow = ram.load(pc.load());
@@ -557,7 +683,16 @@ public class InstructrionSet
 		}
 	}
 
-	private void loadStackPointerToDirect16(ProgrammCounter pc, Register16bit sp, Flags flags, Ram ram)
+	/**
+	 * Puts the stack pointer to RAM addressed by a immediate 16 bit value.
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: nn read, Memory access for low byte
+	 * @Cycle2: nn read, Memory access for high byte
+	 * @Cycle3: SP write, Memory access for low byte
+	 * @Cycle4: SP write, Memory access for high byte
+	 */
+	private void ld_a16_SP(ProgrammCounter pc, Register16bit sp, Flags flags, Ram ram)
 	{
 		operationQueue.add(() -> {
 			lowShadow = ram.load(pc.load());
@@ -578,28 +713,55 @@ public class InstructrionSet
 		});
 	}
 
-	private void loadRegisterToRegister(Register8Bit from, Register8Bit and, Register16bit to)
+	/**
+	 * Puts h and l together in the stack pointer register.
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: Loads h and l to the stack pointer
+	 */
+	private void ld_SP_HL(Register8Bit h, Register8Bit l, Register16bit sp)
 	{
 		operationQueue.add(() -> {
-			to.put(from.load(), and.load());
+			sp.put(h.load(), l.load());
 		});
 	}
 
-	private void loadRamAdressedByRegisterInRegister(Ram ram, Register8Bit high, Register8Bit low, Register8Bit to)
+	/**
+	 * Loads a value from RAM addressed by a register pair to a register
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: n read, Memory access
+	 */
+	private void ld_R1_aR2R3(Ram ram, Register8Bit high, Register8Bit low, Register8Bit to)
 	{
 		operationQueue.add(() -> {
 			to.put(ram.load(high.load(), low.load()));
 		});
 	}
 
-	private void putRegisterInRamAdressedByRegister(Ram ram, Register8Bit high, Register8Bit low, Register8Bit from)
+	/**
+	 * Puts a value from a register to RAM addressed by a register pair
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: n write, Memory access
+	 */
+	private void ld_aR1R2_R3(Ram ram, Register8Bit high, Register8Bit low, Register8Bit from)
 	{
 		operationQueue.add(() -> {
 			ram.put(high.load(), low.load(), from.load());
 		});
 	}
 
-	private void loadRamAdressedByImmediate16InRegister(ProgrammCounter pc, Ram ram, Register8Bit register)
+	/**
+	 * Loads a value from RAM, addressed by a immediate 16 bit value, to the
+	 * accumulator
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: nn read, Memory access for low byte
+	 * @Cycle2: nn read, Memory access for high byte
+	 * @Cycle3: n read, Memory access
+	 */
+	private void ld_A_a16(ProgrammCounter pc, Ram ram, Register8Bit register)
 	{
 		operationQueue.add(() -> {
 			lowShadow = ram.load(pc.load());
@@ -614,7 +776,15 @@ public class InstructrionSet
 		});
 	}
 
-	private void putRegisterInRamAdressedByImmediate16(ProgrammCounter pc, Ram ram, Register8Bit register)
+	/**
+	 * Puts the accumulator into RAM, addressed by a immediate 16 bit value,
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: nn read, Memory access for low byte
+	 * @Cycle2: nn read, Memory access for high byte
+	 * @Cycle3: n write, Memory access
+	 */
+	private void ld_a16_A(ProgrammCounter pc, Ram ram, Register8Bit register)
 	{
 		operationQueue.add(() -> {
 			lowShadow = ram.load(pc.load());
@@ -630,7 +800,14 @@ public class InstructrionSet
 
 	}
 
-	private void loadHighAndDirect8ToRegister(ProgrammCounter pc, Ram ram, Register8Bit to)
+	/**
+	 * Loads high RAM addressed by a immediate 8 bit value to the accumulator
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: n read, Memory access for low byte
+	 * @Cycle3: n read, Memory access
+	 */
+	private void ldh_A_a8(ProgrammCounter pc, Ram ram, Register8Bit to)
 	{
 		operationQueue.add(() -> {
 			lowShadow = ram.load(pc.load());
@@ -641,7 +818,14 @@ public class InstructrionSet
 		});
 	}
 
-	private void loadRegisterToHighAndDirect8(ProgrammCounter pc, Ram ram, Register8Bit from)
+	/**
+	 * Puts accumulator to high RAM addressed by a immediate 8 bit value
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: n read, Memory access for low byte
+	 * @Cycle3: n write, Memory access
+	 */
+	private void ldh_a8_A(ProgrammCounter pc, Ram ram, Register8Bit from)
 	{
 		operationQueue.add(() -> {
 			lowShadow = ram.load(pc.load());
@@ -652,14 +836,27 @@ public class InstructrionSet
 		});
 	}
 
-	private void putImmediate8InRegister(ProgrammCounter pc, Ram ram, Register8Bit register)
+	/**
+	 * Loads a immediate 8 bit value into a register
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: n read, Memory access
+	 */
+	private void ld_R1_d8(ProgrammCounter pc, Ram ram, Register8Bit register)
 	{
 		operationQueue.add(() -> {
 			register.put(ram.load(pc.load()));
 		});
 	}
 
-	private void loadDirect8ToWhereHLPoints(ProgrammCounter pc, Ram ram, Register8Bit h, Register8Bit l)
+	/**
+	 * Loads a immediate 8 bit value into RAM addressed by hl
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: n read, Memory access
+	 * @Cycle2: n write, Memory access
+	 */
+	private void ld_aHL_d8(ProgrammCounter pc, Ram ram, Register8Bit h, Register8Bit l)
 	{
 		operationQueue.add(() -> {
 			lowShadow = ram.load(pc.load());
@@ -670,7 +867,13 @@ public class InstructrionSet
 		});
 	}
 
-	private void inc16BitRegister(Flags flags, Register8Bit high, Register8Bit low)
+	/**
+	 * Increments a register pair
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: Increment of register pair
+	 */
+	private void inc_R1R2(Flags flags, Register8Bit high, Register8Bit low)
 	{
 		operationQueue.add(() -> {
 			Register16bit toIncrement = new Register16bit(high.load(), low.load(), flags);
@@ -682,14 +885,26 @@ public class InstructrionSet
 		});
 	}
 
-	private void inc16BitRegister(Register16bit register)
+	/**
+	 * Increments a 16 bit register
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: Increment of 16 bit register
+	 */
+	private void inc_R(Register16bit register)
 	{
 		operationQueue.add(() -> {
 			register.inc();
 		});
 	}
 
-	private void dcr16BitRegister(Flags flags, Register8Bit high, Register8Bit low)
+	/**
+	 * Decrement a register pair
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: Decrement of register pair
+	 */
+	private void dec_R1R2(Flags flags, Register8Bit high, Register8Bit low)
 	{
 		operationQueue.add(() -> {
 			Register16bit toIncrement = new Register16bit(high.load(), low.load(), flags);
@@ -701,14 +916,27 @@ public class InstructrionSet
 		});
 	}
 
-	private void dcr16BitRegister(Register16bit register)
+	/**
+	 * Decrement a 16 bit register
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: Decrement of 16 bit register
+	 */
+	private void dec_R(Register16bit register)
 	{
 		operationQueue.add(() -> {
 			register.dcr();
 		});
 	}
 
-	private void incWhereHLPoints(Flags flags, Ram ram, Register8Bit h, Register8Bit l)
+	/**
+	 * Increment RAM addressed by HL
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: n read, Memory access
+	 * @Cycle2: n write, Memory access
+	 */
+	private void inc_aHL(Flags flags, Ram ram, Register8Bit h, Register8Bit l)
 	{
 		operationQueue.add(() -> {
 			lowShadow = ram.load(h.load(), l.load());
@@ -721,7 +949,14 @@ public class InstructrionSet
 		});
 	}
 
-	private void dcrWhereHLPoints(Flags flags, Ram ram, Register8Bit h, Register8Bit l)
+	/**
+	 * Decrement RAM addressed by HL
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: n read, Memory access
+	 * @Cycle2: n write, Memory access
+	 */
+	private void dec_aHL(Flags flags, Ram ram, Register8Bit h, Register8Bit l)
 	{
 		operationQueue.add(() -> {
 			lowShadow = ram.load(h.load(), l.load());
@@ -734,7 +969,13 @@ public class InstructrionSet
 		});
 	}
 
-	private void addRegisterToHL(Flags flags, Register8Bit h, Register8Bit l, Register8Bit high, Register8Bit low)
+	/**
+	 * Add register pair value to HL
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: Add register pair to HL
+	 */
+	private void add_HL_R1R2(Flags flags, Register8Bit h, Register8Bit l, Register8Bit high, Register8Bit low)
 	{
 		operationQueue.add(() -> {
 			Register16bit hl = new Register16bit(h.load(), l.load(), flags);
@@ -745,7 +986,13 @@ public class InstructrionSet
 		});
 	}
 
-	private void addRegisterToHL(Flags flags, Ram ram, Register8Bit h, Register8Bit l, Register16bit register)
+	/**
+	 * Add 16 bit register value to HL
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: Add 16 bit register to HL
+	 */
+	private void add_HL_R(Flags flags, Ram ram, Register8Bit h, Register8Bit l, Register16bit register)
 	{
 		operationQueue.add(() -> {
 			Register16bit hl = new Register16bit(h.load(), l.load(), flags);
@@ -756,7 +1003,14 @@ public class InstructrionSet
 		});
 	}
 
-	private void putSignedImmediate8PlusSPToHL(ProgrammCounter pc, Flags flags, Ram ram, Register8Bit h, Register8Bit l,
+	/**
+	 * Put value from SP plus a signed immediate value to HL
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: n read, Memory access
+	 * @Cycle2: Put value from SP plus a signed immediate value to HL
+	 */
+	private void ld_HL_SPr8(ProgrammCounter pc, Flags flags, Ram ram, Register8Bit h, Register8Bit l,
 			Register16bit register)
 	{
 		operationQueue.add(() -> {
@@ -771,7 +1025,15 @@ public class InstructrionSet
 		});
 	}
 
-	private void addSignedDirect8ToRegister(ProgrammCounter pc, Ram ram, Register16bit register)
+	/**
+	 * Adds a signed immediate value to SP
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: n read, Memory access
+	 * @Cycle2: Add the signed immediate value to SP
+	 * @Cycle3: Internal delay
+	 */
+	private void add_SP_r8(ProgrammCounter pc, Ram ram, Register16bit register)
 	{
 		operationQueue.add(() -> {
 			lowShadow = ram.load(pc.load());
@@ -783,7 +1045,14 @@ public class InstructrionSet
 		});
 	}
 
-	private void loadDirect16ToRegister(ProgrammCounter pc, Ram ram, Register8Bit high, Register8Bit low)
+	/**
+	 * Puts a immediate 16 bit value in a register pair
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: nn read, Memory access low byte
+	 * @Cycle2: nn read, Memory access high byte
+	 */
+	private void ld_R1R2_d16(ProgrammCounter pc, Ram ram, Register8Bit high, Register8Bit low)
 	{
 		operationQueue.add(() -> {
 			low.put(ram.load(pc.load()));
@@ -794,7 +1063,14 @@ public class InstructrionSet
 		});
 	}
 
-	private void loadDirect16ToRegister(ProgrammCounter pc, Ram ram, Register16bit register)
+	/**
+	 * Puts a immediate 16 bit value in a 16 bit register
+	 * 
+	 * @Cycle0: Instruction decoding
+	 * @Cycle1: nn read, Memory access low byte
+	 * @Cycle2: nn read, Memory access high byte
+	 */
+	private void ld_R_d16(ProgrammCounter pc, Ram ram, Register16bit register)
 	{
 		operationQueue.add(() -> {
 			lowShadow = ram.load(pc.load());
@@ -806,7 +1082,7 @@ public class InstructrionSet
 
 	}
 
-	private void dcrHL(Register8Bit h, Register8Bit l, Flags flags)
+	private void decrementHL(Register8Bit h, Register8Bit l, Flags flags)
 	{
 		Register16bit hl = new Register16bit(h.load(), l.load(), flags);
 		hl.dcr();
@@ -814,7 +1090,7 @@ public class InstructrionSet
 		l.put(hl.loadLow());
 	}
 
-	private void incHL(Register8Bit h, Register8Bit l, Flags flags)
+	private void incrementHL(Register8Bit h, Register8Bit l, Flags flags)
 	{
 		Register16bit hl = new Register16bit(h.load(), l.load(), flags);
 		hl.inc();

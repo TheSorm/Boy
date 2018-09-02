@@ -3,14 +3,10 @@ package cpu;
 import ram.RamRegister;
 
 /**
- * Gives Information about pending Interrupts
- * 
- * @author Torge
- *
+ * Ram register which shows, which interrupts are currently pending.
  */
 public class InterruptFlagRegister extends RamRegister
 {
-
 	private static final int IF_ADRESS = 0xFF0F;
 
 	private static final int BUTTON_PRESSED_POSITION = 4;
@@ -19,11 +15,11 @@ public class InterruptFlagRegister extends RamRegister
 	private static final int LCDC_POSITION = 1;
 	private static final int V_BLANK_POSITION = 0;
 
-	public static final byte BUTTON_PRESSED_ADRESS = 0x60;
-	public static final byte SERIAL_IO_TRANSFER_COMPLETE_ADRESS = 0x58;
-	public static final byte TIMER_OVERFLOW_ADRESS = 0x50;
-	public static final byte LCDC_ADRESS = 0x48;
-	public static final byte V_BLANK_ADRESS = 0x40;
+	public static final byte BUTTON_PRESSED_JUMP_ADRESS = 0x60;
+	public static final byte SERIAL_IO_TRANSFER_COMPLETE_JUMP_ADRESS = 0x58;
+	public static final byte TIMER_OVERFLOW_JUMP_ADRESS = 0x50;
+	public static final byte LCDC_JUMP_ADRESS = 0x48;
+	public static final byte V_BLANK_JUMP_ADRESS = 0x40;
 
 	public InterruptFlagRegister()
 	{
@@ -85,27 +81,27 @@ public class InterruptFlagRegister extends RamRegister
 		if (getVBlankPending() && interruptEnable.isVBlankEnabled())
 		{
 			setVBlankPending(false);
-			return V_BLANK_ADRESS;
+			return V_BLANK_JUMP_ADRESS;
 		}
 		else if (getLCDCPending() && interruptEnable.isLCDCEnabled())
 		{
 			setLCDCPending(false);
-			return LCDC_ADRESS;
+			return LCDC_JUMP_ADRESS;
 		}
 		else if (getTimerOverflowPending() && interruptEnable.isTimerOverflowEnabled())
 		{
 			setTimerOverflowPending(false);
-			return TIMER_OVERFLOW_ADRESS;
+			return TIMER_OVERFLOW_JUMP_ADRESS;
 		}
 		else if (getSerialIOTransferCompletePending() && interruptEnable.isSerialIOTransferCompleteEnabled())
 		{
 			setSerialIOTransferCompletePending(false);
-			return SERIAL_IO_TRANSFER_COMPLETE_ADRESS;
+			return SERIAL_IO_TRANSFER_COMPLETE_JUMP_ADRESS;
 		}
 		else if (getButtonPressedPending() && interruptEnable.isButtonPressedEnabled())
 		{
 			setButtonPressedPending(false);
-			return BUTTON_PRESSED_ADRESS;
+			return BUTTON_PRESSED_JUMP_ADRESS;
 		}
 		else
 		{

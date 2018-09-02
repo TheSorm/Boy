@@ -86,7 +86,7 @@ public class CPU extends TickBasedComponend
 			{
 				if (state == State.NORMAL || interruptMasterEnable)
 				{
-					instructionSet.restartAt(pc, sp, ram, interruptFlag, interruptEnable);
+					instructionSet.rst(pc, sp, ram, interruptFlag, interruptEnable);
 					interruptMasterEnable = false;
 					state = State.NORMAL;
 					return true;
@@ -97,7 +97,7 @@ public class CPU extends TickBasedComponend
 			{
 				if (state == State.NORMAL || interruptMasterEnable)
 				{
-					instructionSet.restartAt(pc, sp, ram, interruptFlag, interruptEnable);
+					instructionSet.rst(pc, sp, ram, interruptFlag, interruptEnable);
 					interruptMasterEnable = false;
 					state = State.NORMAL;
 					return true;
@@ -109,7 +109,7 @@ public class CPU extends TickBasedComponend
 			{
 				if (state == State.NORMAL || interruptMasterEnable)
 				{
-					instructionSet.restartAt(pc, sp, ram, interruptFlag, interruptEnable);
+					instructionSet.rst(pc, sp, ram, interruptFlag, interruptEnable);
 					interruptMasterEnable = false;
 					state = State.NORMAL;
 					return true;
@@ -122,7 +122,7 @@ public class CPU extends TickBasedComponend
 			{
 				if (state == State.NORMAL || interruptMasterEnable)
 				{
-					instructionSet.restartAt(pc, sp, ram, interruptFlag, interruptEnable);
+					instructionSet.rst(pc, sp, ram, interruptFlag, interruptEnable);
 					interruptMasterEnable = false;
 					state = State.NORMAL;
 					return true;
@@ -134,7 +134,7 @@ public class CPU extends TickBasedComponend
 			{
 				if (state == State.NORMAL || interruptMasterEnable)
 				{
-					instructionSet.restartAt(pc, sp, ram, interruptFlag, interruptEnable);
+					instructionSet.rst(pc, sp, ram, interruptFlag, interruptEnable);
 					interruptMasterEnable = false;
 					state = State.NORMAL;
 					return true;

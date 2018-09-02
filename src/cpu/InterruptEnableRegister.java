@@ -3,14 +3,10 @@ package cpu;
 import ram.RamRegister;
 
 /**
- * Gives Information about enabled interrupts
- * 
- * @author Torge
- *
+ * RAM register which is used to enable and disable different interrupts.
  */
 public class InterruptEnableRegister extends RamRegister
 {
-
 	private static final int IE_ADRESS = 0xFFFF;
 
 	private static final int BUTTON_PRESSED_POSITION = 4;

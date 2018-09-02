@@ -26,6 +26,9 @@ public class BlarggsRomsTest extends NoOutputTest
 				
 		for (int i = 0; i < listOfFolders.length; i++)
 		{
+			if(listOfFolders[i].isFile()) {
+				continue;
+			}
 			File[] listOfFiles = new File(listOfFolders[i].getPath() + "/individual").listFiles();
 			for (int j = 0; j < listOfFiles.length; j++)
 			{

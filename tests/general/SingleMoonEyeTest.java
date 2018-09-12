@@ -11,7 +11,11 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import connectos.JoypadConnector;
+import connectos.LcdConnector;
 import gameboy.Gameboy;
+import gameboy.MegiHertz;
+import tools.IPSMonitor;
 import ui.Window;
 
 @RunWith(Parameterized.class)
@@ -40,8 +44,12 @@ public class SingleMoonEyeTest // extends NoOutputTest
 	@Test
 	public void test()
 	{
-		Gameboy gameboy = new Gameboy(fInput, 0);
-		Window window = new Window(gameboy.getIPSMonitor(), gameboy.getPanel(), gameboy.getKeyListener());
+		LcdConnector lcdConnector = new LcdConnector();
+		JoypadConnector joypadConnector = new JoypadConnector();
+		IPSMonitor ipsMonitor = new IPSMonitor();
+		Gameboy gameboy = new Gameboy("resources/Roms/SuperMarioLand.gb", MegiHertz.get(4), ipsMonitor, lcdConnector,
+				joypadConnector);
+		Window window = new Window(ipsMonitor, lcdConnector, joypadConnector);
 
 		new Thread(window).start();
 		window.setVisible(true);

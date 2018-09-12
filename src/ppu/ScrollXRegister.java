@@ -16,11 +16,4 @@ public class ScrollXRegister extends RamRegister
 	{
 		return getValue();
 	}
-	
-	@Override
-	public void put(int adress, byte input)
-	{
-		System.out.println("SCX: " + Byte.toUnsignedInt(input));
-		super.put(adress, input);
-	}
 }

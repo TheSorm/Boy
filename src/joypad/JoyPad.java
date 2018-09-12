@@ -3,97 +3,24 @@ package joypad;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+import connectos.JoypadConnector;
 import cpu.InterruptFlagRegister;
+import gameboy.MegiHertz;
 import gameboy.TickBasedComponend;
 
-public class JoyPad extends TickBasedComponend implements KeyListener
+public class JoyPad extends TickBasedComponend
 {
 	private JoypadInformationRegister joypadInformation;
 	private InterruptFlagRegister interruptFlag;
+	private JoypadConnector joypadConnector;
 
-	private boolean downIsPressed;
-	private boolean upIsPressed;
-	private boolean leftIsPressed;
-	private boolean rightIsPressed;
-	private boolean startIsPressed;
-	private boolean selectIsPressed;
-	private boolean aIsPressed;
-	private boolean bIsPressed;
-
-	public JoyPad(JoypadInformationRegister joypadInformation, InterruptFlagRegister interruptFlag)
+	public JoyPad(JoypadInformationRegister joypadInformation, InterruptFlagRegister interruptFlag,
+			JoypadConnector joypadConnector)
 	{
-		super(4194304);
+		super(MegiHertz.get(4));
 		this.joypadInformation = joypadInformation;
 		this.interruptFlag = interruptFlag;
-	}
-
-	@Override
-	public void keyPressed(KeyEvent event)
-	{
-		switch (event.getKeyCode())
-		{
-			case KeyEvent.VK_DOWN:
-				downIsPressed = true;
-				break;
-			case KeyEvent.VK_UP:
-				upIsPressed = true;
-				break;
-			case KeyEvent.VK_LEFT:
-				leftIsPressed = true;
-				break;
-			case KeyEvent.VK_RIGHT:
-				rightIsPressed = true;
-				break;
-			case KeyEvent.VK_SPACE:
-				startIsPressed = true;
-				break;
-			case KeyEvent.VK_ENTER:
-				selectIsPressed = true;
-				break;
-			case KeyEvent.VK_B:
-				bIsPressed = true;
-				break;
-			case KeyEvent.VK_A:
-				aIsPressed = true;
-				break;
-		}
-	}
-
-	@Override
-	public void keyReleased(KeyEvent event)
-	{
-		switch (event.getKeyCode())
-		{
-			case KeyEvent.VK_DOWN:
-				downIsPressed = false;
-				break;
-			case KeyEvent.VK_UP:
-				upIsPressed = false;
-				break;
-			case KeyEvent.VK_LEFT:
-				leftIsPressed = false;
-				break;
-			case KeyEvent.VK_RIGHT:
-				rightIsPressed = false;
-				break;
-			case KeyEvent.VK_SPACE:
-				startIsPressed = false;
-				break;
-			case KeyEvent.VK_ENTER:
-				selectIsPressed = false;
-				break;
-			case KeyEvent.VK_B:
-				bIsPressed = false;
-				break;
-			case KeyEvent.VK_A:
-				aIsPressed = false;
-				break;
-		}
-	}
-
-	@Override
-	public void keyTyped(KeyEvent event)
-	{
+		this.joypadConnector = joypadConnector;
 	}
 
 	@Override
@@ -106,42 +33,42 @@ public class JoyPad extends TickBasedComponend implements KeyListener
 
 		boolean isAnyButtonPressed = joypadInformation.isButtonPressed();
 
-		if (downIsPressed)
+		if (joypadConnector.isDownPressed())
 		{
 			joypadInformation.setInputDown(true);
 		}
 
-		if (upIsPressed)
+		if (joypadConnector.isUpPressed())
 		{
 			joypadInformation.setInputUp(true);
 		}
 
-		if (leftIsPressed)
+		if (joypadConnector.isLeftPressed())
 		{
 			joypadInformation.setInputLeft(true);
 		}
 
-		if (rightIsPressed)
+		if (joypadConnector.isRightPressed())
 		{
 			joypadInformation.setInputRight(true);
 		}
 
-		if (startIsPressed)
+		if (joypadConnector.isStartPressed())
 		{
 			joypadInformation.setInputStart(true);
 		}
 
-		if (selectIsPressed)
+		if (joypadConnector.isSelectPressed())
 		{
 			joypadInformation.setInputSelect(true);
 		}
 
-		if (aIsPressed)
+		if (joypadConnector.isaPressed())
 		{
 			joypadInformation.setInputA(true);
 		}
 
-		if (bIsPressed)
+		if (joypadConnector.isbPressed())
 		{
 			joypadInformation.setInputB(true);
 		}

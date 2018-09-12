@@ -12,11 +12,11 @@ public class PixelFifo extends TickBasedComponend
 	private static final int MINIMUM_FIFO_SIZE = 8;
 
 	private LinkedList<PixelInformation> fifo;
-	private BufferedImage image;
 	private ScrollXRegister scrollX;
 	private BackgroundAndWindowColorPalette backgroundAndWindowColorPalette;
 	private ObjectColorPalette0 obj0;
 	private ObjectColorPalette1 obj1;
+	private LCD lcd;
 
 	private int lcdXDrawPosition;
 	private int lcdYDrawPosition;
@@ -25,20 +25,20 @@ public class PixelFifo extends TickBasedComponend
 
 	public PixelFifo(ScrollXRegister scrollX, ScrollYRegister scrollY,
 			BackgroundAndWindowColorPalette backgroundAndWindowColorPalette, ObjectColorPalette0 obj0,
-			ObjectColorPalette1 obj1)
+			ObjectColorPalette1 obj1, LCD lcd)
 	{
 		super(MegiHertz.get(4));
 		this.scrollX = scrollX;
 		this.backgroundAndWindowColorPalette = backgroundAndWindowColorPalette;
 		this.obj0 = obj0;
 		this.obj1 = obj1;
+		this.lcd = lcd;
 
 		lcdXDrawPosition = 0;
 		lcdYDrawPosition = 0;
 		xOffset = this.scrollX.getXScroll() % 8;
 
 		fifo = new LinkedList<>();
-		image = new BufferedImage(LCD.LCD_WIDTH, LCD.LCD_HEIGHT, BufferedImage.TYPE_INT_RGB);
 	}
 
 	@Override
@@ -48,8 +48,9 @@ public class PixelFifo extends TickBasedComponend
 		{
 			return true;
 		}
-		
-		if(xOffset == -1) {
+
+		if (xOffset == -1)
+		{
 			xOffset = this.scrollX.getXScroll() % 8;
 		}
 
@@ -67,14 +68,14 @@ public class PixelFifo extends TickBasedComponend
 			switch (infos.source)
 			{
 				case BACKGROUND_AND_WINDOW:
-					image.setRGB(lcdXDrawPosition, lcdYDrawPosition,
+					lcd.setPixel(lcdXDrawPosition, lcdYDrawPosition,
 							backgroundAndWindowColorPalette.getColorFor(infos.color));
 					break;
 				case OBJECT_0:
-					image.setRGB(lcdXDrawPosition, lcdYDrawPosition, obj0.getColorFor(infos.color));
+					lcd.setPixel(lcdXDrawPosition, lcdYDrawPosition, obj0.getColorFor(infos.color));
 					break;
 				case OBJECT_1:
-					image.setRGB(lcdXDrawPosition, lcdYDrawPosition, obj1.getColorFor(infos.color));
+					lcd.setPixel(lcdXDrawPosition, lcdYDrawPosition, obj1.getColorFor(infos.color));
 					break;
 			}
 
@@ -127,11 +128,6 @@ public class PixelFifo extends TickBasedComponend
 	public boolean isEmpty()
 	{
 		return fifo.isEmpty();
-	}
-
-	public BufferedImage getImage()
-	{
-		return image;
 	}
 
 	public void reset()

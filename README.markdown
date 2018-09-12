@@ -13,7 +13,6 @@ Boy is a Gamboy (dmg not 0) emulator written in Java.
 ### To-do
 * Pass all tests for dmg (not 0)
 * Implement sound
-* Totally split ui from emulator
 * Make implementation of MBC1 clearer
 * Implement all other MBC's
 

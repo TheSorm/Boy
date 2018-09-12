@@ -2,14 +2,11 @@ package gameboy;
 
 import java.awt.event.KeyListener;
 
-import javax.swing.JPanel;
-
 import cartridge.BootRomUnmapRegister;
 import cartridge.BootRom;
 import cartridge.Cartridge;
-import cartridge.RomBank0;
-import cartridge.SwitchableRamBank;
-import cartridge.SwitchableRomBank;
+import connectos.JoypadConnector;
+import connectos.LcdConnector;
 import cpu.Accumulator;
 import cpu.CPU;
 import cpu.Flags;
@@ -24,7 +21,6 @@ import ppu.BackgroundAndWindowColorPalette;
 import ppu.DMAMecanism;
 import ppu.DirectMemoryAcessRegister;
 import ppu.LCD;
-import ppu.LCD.Panel;
 import ppu.LCDControlStatusRegister;
 import ppu.LCDControllRegister;
 import ppu.LCDControllYCompare;
@@ -83,7 +79,8 @@ public class Gameboy
 	private Register8Bit l;
 	private int baseClockHz;
 
-	public Gameboy(String RomPath, int baseClockHz)
+	public Gameboy(String RomPath, int baseClockHz, IPSMonitor ipsMonitor, LcdConnector lcdConnector,
+			JoypadConnector joypadConnector)
 	{
 		this.baseClockHz = baseClockHz;
 
@@ -140,22 +137,22 @@ public class Gameboy
 
 		this.cpu = new CPU(ram, accu, pc, sp, b, c, d, e, h, l, flags, interruptEnableRegister, interruptFlagRegister);
 
+		this.lcd = new LCD(lcdControll, lcdConnector);
+
 		this.ppu = new PPU(tilePatternTable, scrollX, scrollY, lcdControll, lcdControllYCompare,
 				lcdControlStatusRegister, lcdYCoordinate, backgroundAndWindowColorPalette, obj0, obj1,
-				interruptFlagRegister, tileMap, objectAtributeMap, videoRam);
+				interruptFlagRegister, tileMap, objectAtributeMap, videoRam, lcd);
 
 		this.timer = new Timer(timerControl, timerCounter, timerModulo, interruptFlagRegister, divider);
 
-		this.joypad = new JoyPad(joypadInformation, interruptFlagRegister);
-
-		this.lcd = new LCD(ppu.getPixelFifo(), lcdControll);
+		this.joypad = new JoyPad(joypadInformation, interruptFlagRegister, joypadConnector);
 
 		this.dma = new DMAMecanism(dmaRegister, ram, objectAtributeMap);
 
 		this.cardridgeOverBootRomMapper = new CardridgeOverBootRomMapper(cartridge, unusableMemory1, ram,
 				bootRomTurnOff);
 
-		this.ipsMonitor = new IPSMonitor();
+		this.ipsMonitor = ipsMonitor;
 
 		instructionCount = 0;
 		elapsedTime = System.nanoTime();
@@ -163,10 +160,6 @@ public class Gameboy
 
 	public void start()
 	{
-		// CPUDataScreen cpuScreen = new CPUDataScreen(ram, accu, pc, sp, b, c,
-		// d, e, h, l, flags);
-
-		// new Thread(cpuScreen).start();
 		while (true)
 		{
 			tick();
@@ -200,24 +193,8 @@ public class Gameboy
 		return ram;
 	}
 
-	public Panel getPanel()
-	{
-		return lcd.getPanel();
-	}
-
-	public KeyListener getKeyListener()
-	{
-		return joypad;
-	}
-
 	public CPU getCpu()
 	{
 		return cpu;
 	}
-
-	public IPSMonitor getIPSMonitor()
-	{
-		return ipsMonitor;
-	}
-
 }

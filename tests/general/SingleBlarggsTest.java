@@ -10,7 +10,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import connectos.JoypadConnector;
+import connectos.LcdConnector;
 import gameboy.Gameboy;
+import tools.IPSMonitor;
 
 @RunWith(Parameterized.class)
 public class SingleBlarggsTest
@@ -38,7 +41,7 @@ public class SingleBlarggsTest
 	@Test
 	public void test()
 	{
-		Gameboy gameboy = new Gameboy(fInput, 0);
+		Gameboy gameboy = new Gameboy(fInput, 0, new IPSMonitor(), new LcdConnector(), new JoypadConnector());
 		StringBuilder result = new StringBuilder();
 		while (result.indexOf("Failed") == -1 && result.indexOf("Passed") == -1)
 		{

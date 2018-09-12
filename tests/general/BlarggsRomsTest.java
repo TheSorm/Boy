@@ -11,22 +11,26 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import connectos.JoypadConnector;
+import connectos.LcdConnector;
 import gameboy.Gameboy;
+import tools.IPSMonitor;
 
 @RunWith(Parameterized.class)
 public class BlarggsRomsTest extends NoOutputTest
 {
-	@Parameters( name = "{1}" )
+	@Parameters(name = "{1}")
 	public static List<Object> data()
 	{
 		List<Object> files = new ArrayList<>();
-		
+
 		File folder = new File("resources/TestData/blarggs");
 		File[] listOfFolders = folder.listFiles();
-				
+
 		for (int i = 0; i < listOfFolders.length; i++)
 		{
-			if(listOfFolders[i].isFile()) {
+			if (listOfFolders[i].isFile())
+			{
 				continue;
 			}
 			File[] listOfFiles = new File(listOfFolders[i].getPath() + "/individual").listFiles();
@@ -51,7 +55,7 @@ public class BlarggsRomsTest extends NoOutputTest
 	@Test
 	public void test()
 	{
-		Gameboy gameboy = new Gameboy(fInput, 0);
+		Gameboy gameboy = new Gameboy(fInput, 0, new IPSMonitor(), new LcdConnector(), new JoypadConnector());
 		StringBuilder result = new StringBuilder();
 		while (result.indexOf("Failed") == -1 && result.indexOf("Passed") == -1)
 		{
@@ -63,7 +67,7 @@ public class BlarggsRomsTest extends NoOutputTest
 				gameboy.getRam().put(0xFF01, 0);
 			}
 		}
-		
+
 		assertTrue(result.toString() + "\n" + fInput, result.indexOf("Passed") != -1);
 	}
 

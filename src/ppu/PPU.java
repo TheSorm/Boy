@@ -39,10 +39,10 @@ public class PPU extends TickBasedComponend
 			LCDControlStatusRegister lcdControlStatusRegister, LCDControllYCoordinateRegister lcdYCoordinate,
 			BackgroundAndWindowColorPalette backgroundAndWindowColorPalette, ObjectColorPalette0 obj0,
 			ObjectColorPalette1 obj1, InterruptFlagRegister interruptFlagRegister, TileMap tileMap,
-			ObjectsAttributeMap oaMap, VideoRam videoRam)
+			ObjectsAttributeMap oaMap, VideoRam videoRam, LCD lcd)
 	{
 		super(MegiHertz.get(4));
-		this.fifo = new PixelFifo(scrollX, scrollY, backgroundAndWindowColorPalette, obj0, obj1);
+		this.fifo = new PixelFifo(scrollX, scrollY, backgroundAndWindowColorPalette, obj0, obj1, lcd);
 		this.oamSearcher = new OAMSearcher(lcdControll, lcdYCoordinate, oaMap);
 		this.lcdYCoordinate = lcdYCoordinate;
 		this.fetcher = new Fetcher(tilePatternTable, fifo, lcdControll, oamSearcher, lcdYCoordinate, tileMap);
@@ -107,14 +107,17 @@ public class PPU extends TickBasedComponend
 				interruptFlagRegister.setLCDCPending(true);
 			}
 		}
-		if (count == 79)
-		{
-			System.out.println("79 " + internelMode);
-			System.out.println(
-					"LY: " + lcdYCoordinate.loadLcdYCoordinate() + ", Mode: " + lcdControlStatusRegister.getStatus()
-							+ ", OAM read: " + oam.isReadAllowed() + ", OAM write: " + oam.isWriteAllowed()
-							+ ", VRam read: " + vRam.isReadAllowed() + ", VRam write: " + vRam.isWriteAllowed());
-		}
+		// if (count == 79)
+		// {
+		// System.out.println("79 " + internelMode);
+		// System.out.println(
+		// "LY: " + lcdYCoordinate.loadLcdYCoordinate() + ", Mode: " +
+		// lcdControlStatusRegister.getStatus()
+		// + ", OAM read: " + oam.isReadAllowed() + ", OAM write: " +
+		// oam.isWriteAllowed()
+		// + ", VRam read: " + vRam.isReadAllowed() + ", VRam write: " +
+		// vRam.isWriteAllowed());
+		// }
 
 		return false;
 	}
@@ -138,7 +141,6 @@ public class PPU extends TickBasedComponend
 				if (oamSearcher.getState() == OAMState.FINISHED)
 				{
 					internelMode = LCDStatus.PIXEL_TRANSFER;
-					System.out.println(internelMode);
 					oam.allowRead(false);
 					oam.allowWrite(true);
 					vRam.allowRead(false);
@@ -167,7 +169,6 @@ public class PPU extends TickBasedComponend
 				if (fifo.isLineFinished())
 				{
 					internelMode = LCDStatus.H_BLANCK;
-					System.out.println(internelMode);
 				}
 
 				break;
@@ -176,7 +177,6 @@ public class PPU extends TickBasedComponend
 						&& lcdControlStatusRegister.isHBlankInterruptEnabled())
 				{
 					interruptFlagRegister.setLCDCPending(true);
-					System.out.println("Interrupt");
 				}
 				this.lcdControlStatusRegister.setModeHBlank();
 				tickCount++;
@@ -189,7 +189,6 @@ public class PPU extends TickBasedComponend
 					if (veryFirstLine)
 					{
 						internelMode = LCDStatus.PIXEL_TRANSFER;
-						System.out.println(internelMode);
 						tickCount = 0;
 						pixelTransferTickCount = 0;
 						veryFirstLine = false;
@@ -200,7 +199,6 @@ public class PPU extends TickBasedComponend
 					vRam.allowRead(true);
 					vRam.allowWrite(true);
 					internelMode = LCDStatus.OAM_SEARCH;
-					System.out.println(internelMode);
 
 					oamSearcher.reset();
 					tickCount = 0;
@@ -247,7 +245,6 @@ public class PPU extends TickBasedComponend
 				if (lcdYCoordinate.loadLcdYCoordinate() - SCREEN_LINES == V_BLANCK_LINES)
 				{
 					internelMode = LCDStatus.OAM_SEARCH;
-					System.out.println(internelMode);
 					lcdYCoordinate.writeLcdYCoordinate(0);
 					fetcher.reset();
 					fifo.reset();

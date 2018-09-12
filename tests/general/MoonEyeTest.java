@@ -15,7 +15,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import connectos.JoypadConnector;
+import connectos.LcdConnector;
 import gameboy.Gameboy;
+import tools.IPSMonitor;
 
 @RunWith(Parameterized.class)
 public class MoonEyeTest extends NoOutputTest
@@ -85,7 +88,7 @@ public class MoonEyeTest extends NoOutputTest
 	@Test
 	public void test()
 	{
-		Gameboy gameboy = new Gameboy(fInput, 0);
+		Gameboy gameboy = new Gameboy(fInput, 0, new IPSMonitor(), new LcdConnector(), new JoypadConnector());
 		while (!gameboy.getCpu().getCurrentOpCode().equals("100"))
 		{
 			gameboy.tick();

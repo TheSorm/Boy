@@ -28,6 +28,11 @@ public class TimerControlRegister extends RamRegister
 	public TimerControlRegister()
 	{
 		super(TAC_ADRESS);
+		setBit(CONSTANTLY_SETTED_3_POSITION, true);
+		setBit(CONSTANTLY_SETTED_4_POSITION, true);
+		setBit(CONSTANTLY_SETTED_5_POSITION, true);
+		setBit(CONSTANTLY_SETTED_6_POSITION, true);
+		setBit(CONSTANTLY_SETTED_7_POSITION, true);
 	}
 
 	public boolean isTimerStarted()

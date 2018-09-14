@@ -46,15 +46,16 @@ public class SingleBlarggsTest
 		while (result.indexOf("Failed") == -1 && result.indexOf("Passed") == -1)
 		{
 			gameboy.tick();
-			if (Byte.toUnsignedInt(gameboy.getRam().load(0xFF02)) == 0x81
+			if (Byte.toUnsignedInt(gameboy.getRam().load(0xFF02)) == 0xFF
 					&& Byte.toUnsignedInt(gameboy.getRam().load(0xFF01)) != 0)
 			{
 				result.append((char) Byte.toUnsignedInt(gameboy.getRam().load(0xFF01)));
 				gameboy.getRam().put(0xFF01, 0);
 			}
+
 		}
 
-		assertTrue(result.toString(), result.indexOf("Passed") != -1);
+		assertTrue(result.toString() + "\n" + fInput, result.indexOf("Passed") != -1);
 	}
 
 }

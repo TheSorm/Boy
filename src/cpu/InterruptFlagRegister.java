@@ -9,6 +9,9 @@ public class InterruptFlagRegister extends RamRegister
 {
 	private static final int IF_ADRESS = 0xFF0F;
 
+	private static final int UNUSED_BIT_7 = 7;
+	private static final int UNUSED_BIT_6 = 6;
+	private static final int UNUSED_BIT_5 = 5;
 	private static final int BUTTON_PRESSED_POSITION = 4;
 	private static final int SERIAL_IO_TRANSFER_COMPLETE_POSITION = 3;
 	private static final int TIMER_OVERFLOW_POSITION = 2;
@@ -24,6 +27,9 @@ public class InterruptFlagRegister extends RamRegister
 	public InterruptFlagRegister()
 	{
 		super(IF_ADRESS);
+		setBit(UNUSED_BIT_7, true);
+		setBit(UNUSED_BIT_6, true);
+		setBit(UNUSED_BIT_5, true);
 	}
 
 	public boolean getButtonPressedPending()

@@ -27,7 +27,7 @@ public class SingleMoonEyeTest // extends NoOutputTest
 		List<Object> files = new ArrayList<>();
 
 		String[] input = new String[2];
-		input[0] = "resources\\TestData\\mooneye-gb_hwtests\\manual-only\\sprite_priority.gb";
+		input[0] = "resources\\TestData\\mooneye-gb_hwtests\\acceptance\\bits\\unused_hwio-GS.gb";
 		input[1] = "add_sp_e_timing.gb";
 		files.add(input);
 
@@ -47,8 +47,7 @@ public class SingleMoonEyeTest // extends NoOutputTest
 		LcdConnector lcdConnector = new LcdConnector();
 		JoypadConnector joypadConnector = new JoypadConnector();
 		IPSMonitor ipsMonitor = new IPSMonitor();
-		Gameboy gameboy = new Gameboy("resources/Roms/SuperMarioLand.gb", MegiHertz.get(4), ipsMonitor, lcdConnector,
-				joypadConnector);
+		Gameboy gameboy = new Gameboy(fInput, 0, ipsMonitor, lcdConnector, joypadConnector);
 		Window window = new Window(ipsMonitor, lcdConnector, joypadConnector);
 
 		new Thread(window).start();

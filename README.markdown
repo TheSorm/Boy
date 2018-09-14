@@ -55,7 +55,7 @@ Boy is a Gamboy (dmg not 0) emulator written in Java.
 |-----------------------|----|
 |add sp e timing        |:+1:|
 |boot div dmgABCmgb     |:x: |
-|boot hwio dmgABCmgb    |:x: |
+|boot hwio dmgABCmgb    |:+1:|
 |boot regs dmgABC       |:+1:|
 |call timing            |:+1:|
 |call timing2           |:+1:|
@@ -92,7 +92,7 @@ Boy is a Gamboy (dmg not 0) emulator written in Java.
 |--------------|----|
 |mem oam       |:+1:|
 |reg f         |:+1:|
-|unused_hwio GS|:x: |
+|unused_hwio GS|:+1:|
 
 #### Instructions
 

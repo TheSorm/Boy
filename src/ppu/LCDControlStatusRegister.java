@@ -7,7 +7,7 @@ public class LCDControlStatusRegister extends RamRegister
 
 	private static final int STAT_ADRESS = 0xFF41;
 
-	private static final int LYC_UNUSED_BIT__POSITION = 7;
+	private static final int UNUSED_BIT_7_POSITION = 7;
 	private static final int LYC_LY_COINCIDENCE_INTERRUPT_ENABLED_POSITION = 6;
 	private static final int OAM_INTERRUPT_ENABLED_POSITION = 5;
 	private static final int V_BLANK_INTERRUPT_ENABLED_POSITION = 4;
@@ -28,7 +28,7 @@ public class LCDControlStatusRegister extends RamRegister
 		super(STAT_ADRESS);
 		this.lcdControll = lcdControll;
 		
-		setBit(LYC_UNUSED_BIT__POSITION, true);
+		setBit(UNUSED_BIT_7_POSITION, true);
 	}
 
 	public boolean isLYCEqualsLYInterruptEnabled()
@@ -137,14 +137,14 @@ public class LCDControlStatusRegister extends RamRegister
 	public void put(int adress, byte input)
 	{
 		super.put(adress, (byte) ((Byte.toUnsignedInt(input) | 0b0000_0111) & (getValue() | 0b1111_1000)) );
-		setBit(LYC_UNUSED_BIT__POSITION, true);
+		setBit(UNUSED_BIT_7_POSITION, true);
 	}
 
 	@Override
 	protected void putValue(byte value)
 	{
 		super.putValue(value);
-		setBit(LYC_UNUSED_BIT__POSITION, true);
+		setBit(UNUSED_BIT_7_POSITION, true);
 	}
 
 	@Override

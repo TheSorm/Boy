@@ -22,6 +22,29 @@ import ppu.ObjectColorPalette1;
 import ppu.ObjectsAttributeMap;
 import ppu.ScrollXRegister;
 import ppu.ScrollYRegister;
+import serial.SerialControllRegister;
+import serial.SerialTransferDataRegister;
+import sound.ChannelControlRegister;
+import sound.SelectionOfSoundOutputRegister;
+import sound.SoundMode1Envelope;
+import sound.SoundMode1FrequencyHigh;
+import sound.SoundMode1FrequencyLow;
+import sound.SoundMode1SweepRegister;
+import sound.SoundMode1WavePatternDutyAndSoundLength;
+import sound.SoundMode2Envelope;
+import sound.SoundMode2FrequencyHigh;
+import sound.SoundMode2FrequencyLow;
+import sound.SoundMode2WavePatternDutyAndSoundLength;
+import sound.SoundMode3FrequencyHigh;
+import sound.SoundMode3FrequencyLow;
+import sound.SoundMode3SelectOutputLevel;
+import sound.SoundMode3SoundLength;
+import sound.SoundMode3SoundOnOrOff;
+import sound.SoundMode4CounterOrConsecutiveSelection;
+import sound.SoundMode4Envelope;
+import sound.SoundMode4PolynomialCounter;
+import sound.SoundMode4SoundLength;
+import sound.SoundOnOrOffRegister;
 import timer.DividerRegister;
 import timer.TimerControlRegister;
 import timer.TimerCounterRegister;
@@ -41,7 +64,21 @@ public class Ram
 			DirectMemoryAcessRegister directMemoryAcess,
 			BackgroundAndWindowColorPalette backgroundAndWindowColorPalette, ObjectColorPalette0 objectColorPalette0,
 			ObjectColorPalette1 objectColorPalette1, UnusableMemory1 unusableMemory1,
-			BootRomUnmapRegister bootRomTurnOff, HighRam highRam, InterruptEnableRegister interruptEnable)
+			BootRomUnmapRegister bootRomTurnOff, HighRam highRam, InterruptEnableRegister interruptEnable,
+			SoundMode1Envelope soundMode1Envelope, SoundMode1FrequencyHigh soundMode1FrequencyHigh,
+			SoundMode1FrequencyLow soundMode1FrequencyLow, SoundMode1SweepRegister soundMode1SweepRegister,
+			SoundMode1WavePatternDutyAndSoundLength soundMode1WavePatternDutyAndSoundLength,
+			SoundMode2Envelope soundMode2Envelope, SoundMode2FrequencyHigh soundMode2FrequencyHigh,
+			SoundMode2FrequencyLow soundMode2FrequencyLow,
+			SoundMode2WavePatternDutyAndSoundLength soundMode2WavePatternDutyAndSoundLength,
+			SoundMode3FrequencyHigh soundMode3FrequencyHigh, SoundMode3FrequencyLow soundMode3FrequencyLow,
+			SoundMode3SelectOutputLevel soundMode3SelectOutputLevel, SoundMode3SoundLength soundMode3SoundLength,
+			SoundMode3SoundOnOrOff soundMode3SoundOnOrOff,
+			SoundMode4CounterOrConsecutiveSelection soundMode4CounterOrConsecutiveSelection,
+			SoundMode4Envelope soundMode4Envelope, SoundMode4PolynomialCounter soundMode4PolynomialCounter,
+			SoundMode4SoundLength soundMode4SoundLength, SelectionOfSoundOutputRegister selectionOfSoundOutputRegister,
+			ChannelControlRegister channelControlRegister, SoundOnOrOffRegister soundOnOrOffRegister,
+			SerialTransferDataRegister serialTransferDataRegister, SerialControllRegister serialControllRegister)
 	{
 		memoryMap = new HashMap<>();
 
@@ -86,8 +123,8 @@ public class Ram
 		}
 
 		memoryMap.put(joypadInformationRegister.adress, joypadInformationRegister);
-		memoryMap.put(0xFF01, new RamRegisterPlaceHolder(0xFF01));
-		memoryMap.put(0xFF02, new RamRegisterPlaceHolder(0xFF02));
+		memoryMap.put(serialTransferDataRegister.adress, serialTransferDataRegister);
+		memoryMap.put(serialControllRegister.adress, serialControllRegister);
 		memoryMap.put(0xFF03, new UnusableRamRegister(0xFF03));
 		memoryMap.put(dividerRegister.adress, dividerRegister);
 		memoryMap.put(timerCounter.adress, timerCounter);
@@ -103,29 +140,29 @@ public class Ram
 		memoryMap.put(0xFF0E, new UnusableRamRegister(0xFF0e));
 		memoryMap.put(interruptFlag.adress, interruptFlag);
 
-		memoryMap.put(0xFF10, new RamRegisterPlaceHolder(0xFF10));
-		memoryMap.put(0xFF11, new RamRegisterPlaceHolder(0xFF11));
-		memoryMap.put(0xFF12, new RamRegisterPlaceHolder(0xFF12));
-		memoryMap.put(0xFF13, new RamRegisterPlaceHolder(0xFF13));
-		memoryMap.put(0xFF14, new RamRegisterPlaceHolder(0xFF14));
+		memoryMap.put(soundMode1SweepRegister.adress, soundMode1SweepRegister);
+		memoryMap.put(soundMode1WavePatternDutyAndSoundLength.adress, soundMode1WavePatternDutyAndSoundLength);
+		memoryMap.put(soundMode1Envelope.adress, soundMode1Envelope);
+		memoryMap.put(soundMode1FrequencyLow.adress, soundMode1FrequencyLow);
+		memoryMap.put(soundMode1FrequencyHigh.adress, soundMode1FrequencyHigh);
 		memoryMap.put(0xFF15, new UnusableRamRegister(0xFF15));
-		memoryMap.put(0xFF16, new RamRegisterPlaceHolder(0xFF16));
-		memoryMap.put(0xFF17, new RamRegisterPlaceHolder(0xFF17));
-		memoryMap.put(0xFF18, new RamRegisterPlaceHolder(0xFF18));
-		memoryMap.put(0xFF19, new RamRegisterPlaceHolder(0xFF19));
-		memoryMap.put(0xFF1A, new RamRegisterPlaceHolder(0xFF1A));
-		memoryMap.put(0xFF1B, new RamRegisterPlaceHolder(0xFF1B));
-		memoryMap.put(0xFF1C, new RamRegisterPlaceHolder(0xFF1C));
-		memoryMap.put(0xFF1D, new RamRegisterPlaceHolder(0xFF1D));
-		memoryMap.put(0xFF1E, new RamRegisterPlaceHolder(0xFF1E));
+		memoryMap.put(soundMode2WavePatternDutyAndSoundLength.adress, soundMode2WavePatternDutyAndSoundLength);
+		memoryMap.put(soundMode2Envelope.adress, soundMode2Envelope);
+		memoryMap.put(soundMode2FrequencyLow.adress, soundMode2FrequencyLow);
+		memoryMap.put(soundMode2FrequencyHigh.adress, soundMode2FrequencyHigh);
+		memoryMap.put(soundMode3SoundOnOrOff.adress, soundMode3SoundOnOrOff);
+		memoryMap.put(soundMode3SoundLength.adress, soundMode3SoundLength);
+		memoryMap.put(soundMode3SelectOutputLevel.adress, soundMode3SelectOutputLevel);
+		memoryMap.put(soundMode3FrequencyLow.adress, soundMode3FrequencyLow);
+		memoryMap.put(soundMode3FrequencyHigh.adress, soundMode3FrequencyHigh);
 		memoryMap.put(0xFF1F, new UnusableRamRegister(0xFF1F));
-		memoryMap.put(0xFF20, new RamRegisterPlaceHolder(0xFF20));
-		memoryMap.put(0xFF21, new RamRegisterPlaceHolder(0xFF21));
-		memoryMap.put(0xFF22, new RamRegisterPlaceHolder(0xFF22));
-		memoryMap.put(0xFF23, new RamRegisterPlaceHolder(0xFF23));
-		memoryMap.put(0xFF24, new RamRegisterPlaceHolder(0xFF24));
-		memoryMap.put(0xFF25, new RamRegisterPlaceHolder(0xFF25));
-		memoryMap.put(0xFF26, new RamRegisterPlaceHolder(0xFF26));
+		memoryMap.put(soundMode4SoundLength.adress, soundMode4SoundLength);
+		memoryMap.put(soundMode4Envelope.adress, soundMode4Envelope);
+		memoryMap.put(soundMode4PolynomialCounter.adress, soundMode4PolynomialCounter);
+		memoryMap.put(soundMode4CounterOrConsecutiveSelection.adress, soundMode4CounterOrConsecutiveSelection);
+		memoryMap.put(channelControlRegister.adress, channelControlRegister);
+		memoryMap.put(selectionOfSoundOutputRegister.adress, selectionOfSoundOutputRegister);
+		memoryMap.put(soundOnOrOffRegister.adress, soundOnOrOffRegister);
 		memoryMap.put(0xFF27, new UnusableRamRegister(0xFF27));
 		memoryMap.put(0xFF28, new UnusableRamRegister(0xFF28));
 		memoryMap.put(0xFF29, new UnusableRamRegister(0xFF29));
